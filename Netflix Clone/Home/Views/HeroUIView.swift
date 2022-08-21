@@ -17,13 +17,74 @@ class HeroUIView: UIView {
         return imageView
     }()
     
-    private let playButton: UIButton = {
+    lazy var buttonsStack: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.alignment = .center
+        stackView.spacing = 80.0
+        stackView.distribution = .fill
+        [
+            self.addButton,
+            self.playButton,
+            self.infoButton,
+        ].forEach {
+            stackView.addArrangedSubview($0)
+        }
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+    
+    private let addButton: UIButton = {
+        var config = UIButton.Configuration.plain()
         let button = UIButton()
-        button.setTitle("Play", for: .normal)
-        button.setTitleColor(UIColor.white, for: .normal)
-        button.layer.borderColor = UIColor.systemBackground.cgColor
-        button.layer.borderWidth = 1
+        let image = UIImage(systemName: "plus")?.withRenderingMode(.alwaysTemplate)
+        config.image = image
+        config.imagePadding = 10
+        button.configuration = config
+        button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalToConstant: 50)
+        ])
+        return button
+    }()
+    
+    private let playButton: UIButton = {
+        var configuration = UIButton.Configuration.filled()
+        let button = UIButton()
+        let image = UIImage(systemName: "play.fill")?.withRenderingMode(.alwaysTemplate)
+        configuration.title = "Play"
+        configuration.image = image
+        configuration.titlePadding = 10
+        configuration.imagePadding = 10
+        button.tintColor = .white
+        button.configuration = configuration
+        
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalToConstant: 60)
+        ])
+        
+        return button
+    }()
+    
+    private let infoButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        let button = UIButton()
+        let image = UIImage(systemName: "info.circle")?.withRenderingMode(.alwaysTemplate)
+        config.image = image
+        config.imagePadding = 10
+        button.configuration = config
+        button.tintColor = .white
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalToConstant: 50)
+        ])
+        
         return button
     }()
     
@@ -31,28 +92,26 @@ class HeroUIView: UIView {
         super.init(frame: frame)
         addSubview(heroImageView)
         addGradient()
-        addSubview(playButton)
-        applyConstraints()
+        addSubview(buttonsStack)
+        applyStackViewConstraints()
     }
     
     func addGradient(){
         let gradientLayer = CAGradientLayer()
         gradientLayer.colors = [
             UIColor.clear.cgColor,
-            UIColor.systemBackground.cgColor
+            UIColor.black.cgColor
         ]
         gradientLayer.frame = bounds
         layer.addSublayer(gradientLayer)
     }
     
-    private func applyConstraints() {
-        let playButtonConstraints = [
-            playButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 25),
-            playButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20),
-            playButton.widthAnchor.constraint(equalToConstant: 100)
-        ]
-        
-        NSLayoutConstraint.activate(playButtonConstraints)
+    private func applyStackViewConstraints() {
+        NSLayoutConstraint.activate([
+            buttonsStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            buttonsStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            buttonsStack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -30),
+        ])
     }
    
     
