@@ -6,8 +6,10 @@
 //
 
 import Foundation
+import Combine
 
-struct APICredentialProvider {
+struct APIConstants {
+    static let baseURL = "https://api.themoviedb.org/3"
     static let apiKey = "802fcb321a47d6f99d3e410229ff2f35"
 }
 
@@ -17,63 +19,49 @@ enum TMDBNetworkError: Error {
     case invalidData
     case failedRequest
     case invalidResponse
+    case unknown
 }
 
 class TMDBServices {
     static let shared = TMDBServices()
     
-    private let host = "api.themoviedb.org"
-    private let trendingMoviePath = "/3/trending/movie/week"
+    private var cancellables = Set<AnyCancellable>()
+    private let trendingMoviePath = "/trending/movie/week"
     
-    func fetchTrendingMovies(completion: @escaping (Result<[Movie], TMDBNetworkError>) -> Void) {
-        var urlComponent = URLComponents()
-        urlComponent.scheme = "https"
-        urlComponent.host = host
-        urlComponent.path = trendingMoviePath
-        urlComponent.queryItems = [
-            URLQueryItem(name: "api_key", value: APICredentialProvider.apiKey)
+    func fetchTrendingMovies() -> Future<TrendingMovieResponse, Error> {
+        var urlComponent = URLComponents(string: APIConstants.baseURL.appending(trendingMoviePath))
+        urlComponent?.queryItems = [
+            URLQueryItem(name: "api_key", value: APIConstants.apiKey)
         ]
         
-        guard let url = urlComponent.url else {return completion(.failure(.badURL))}
-        
-        let request = URLRequest(url: url)
-        
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            
-            DispatchQueue.main.async {
-                
-                guard error == nil else {
-                    print("Failed Request: \(error!.localizedDescription)")
-                    return completion(.failure(.failedRequest))
-                }
-                
-                guard let data = data else {
-                    print("No data returned from TMDB")
-                    return completion(.failure(.invalidData))
-                }
-                
-                guard let response = response as? HTTPURLResponse else {
-                    print("Invalid Response")
-                    completion(.failure(.invalidResponse))
-                    return
-                }
-                
-                guard response.statusCode == 200 else {
-                    print("Failed response: \(response.statusCode)")
-                    return
-                }
-                
-                do {
-                    let decoder = JSONDecoder()
-                    decoder.keyDecodingStrategy = .convertFromSnakeCase
-                    let movieData = try decoder.decode(TrendingMovieResponse.self, from: data)
-                    completion(.success(movieData.results))
-                } catch {
-                    print("InvalidData: \(error.localizedDescription)")
-                    completion(.failure(.invalidData))
-                }
+        return Future<TrendingMovieResponse, Error> { [weak self] promise in
+            guard let self = self, let url = urlComponent?.url else {
+                return promise(.failure(TMDBNetworkError.badURL))
             }
             
-        }.resume()
+            URLSession.shared.dataTaskPublisher(for: url)
+                .tryMap { (data, response) -> Data in
+                    guard let httpResponse = response as? HTTPURLResponse, 200...299 ~= httpResponse.statusCode else {
+                        throw TMDBNetworkError.invalidResponse
+                    }
+                    
+                    return data
+                }
+                .decode(type: TrendingMovieResponse.self, decoder: JSONDecoder())
+                .receive(on: RunLoop.main)
+                .sink ( receiveCompletion: { completion in
+                    if case let .failure(error) = completion {
+                        switch error {
+                        case let decodingError as DecodingError:
+                            promise(.failure(decodingError))
+                        case let apiError as TMDBNetworkError:
+                            promise(.failure(apiError))
+                        default:
+                            promise(.failure(TMDBNetworkError.unknown))
+                        }
+                    }
+                }, receiveValue: { promise(.success($0)) })
+                .store(in: &self.cancellables)
+        }
     }
 }
