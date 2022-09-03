@@ -8,9 +8,42 @@
 import Foundation
 import Combine
 
+final class TMDBServices {
+    static let shared = TMDBServices()
+    
+    @discardableResult
+    func load<T>(_ resource: Resource<T>) -> AnyPublisher<T, Error> {
+        
+        guard let request = resource.request else {
+            return .fail(TMDBNetworkError.invalidRequest)
+        }
+        
+        return URLSession.shared.dataTaskPublisher(for: request)
+            .mapError { _ in
+                TMDBNetworkError.invalidRequest
+            }
+            .print()
+            .flatMap { data, response -> AnyPublisher<Data, Error> in
+                guard let response = response as? HTTPURLResponse else {
+                    return .fail(TMDBNetworkError.invalidResponse)
+                }
+
+                guard 200..<300 ~= response.statusCode else {
+                    return .fail(TMDBNetworkError.dataLoadingError(statusCode: response.statusCode, data: data))
+                }
+                
+                return .publish(data)
+            }
+            .decode(type: T.self, decoder: JSONDecoder())
+            .eraseToAnyPublisher()
+    }
+}
+
 struct APIConstants {
-    static let baseURL = "https://api.themoviedb.org/3"
+    static let baseURL = URL(string: "https://api.themoviedb.org/3")!
     static let apiKey = "802fcb321a47d6f99d3e410229ff2f35"
+    static let smallImageURL = "https://image.tmdb.org/t/p/w500/"
+    static let originalImageURL = "https://image.tmdb.org/t/p/original"
 }
 
 enum TMDBNetworkError: Error {
@@ -19,49 +52,7 @@ enum TMDBNetworkError: Error {
     case invalidData
     case failedRequest
     case invalidResponse
+    case dataLoadingError(statusCode: Int, data: Data)
+    case jsonDecodingError(error: Error)
     case unknown
-}
-
-class TMDBServices {
-    static let shared = TMDBServices()
-    
-    private var cancellables = Set<AnyCancellable>()
-    private let trendingMoviePath = "/trending/movie/week"
-    
-    func fetchTrendingMovies() -> Future<TrendingMovieResponse, Error> {
-        var urlComponent = URLComponents(string: APIConstants.baseURL.appending(trendingMoviePath))
-        urlComponent?.queryItems = [
-            URLQueryItem(name: "api_key", value: APIConstants.apiKey)
-        ]
-        
-        return Future<TrendingMovieResponse, Error> { [weak self] promise in
-            guard let self = self, let url = urlComponent?.url else {
-                return promise(.failure(TMDBNetworkError.badURL))
-            }
-            
-            URLSession.shared.dataTaskPublisher(for: url)
-                .tryMap { (data, response) -> Data in
-                    guard let httpResponse = response as? HTTPURLResponse, 200...299 ~= httpResponse.statusCode else {
-                        throw TMDBNetworkError.invalidResponse
-                    }
-                    
-                    return data
-                }
-                .decode(type: TrendingMovieResponse.self, decoder: JSONDecoder())
-                .receive(on: RunLoop.main)
-                .sink ( receiveCompletion: { completion in
-                    if case let .failure(error) = completion {
-                        switch error {
-                        case let decodingError as DecodingError:
-                            promise(.failure(decodingError))
-                        case let apiError as TMDBNetworkError:
-                            promise(.failure(apiError))
-                        default:
-                            promise(.failure(TMDBNetworkError.unknown))
-                        }
-                    }
-                }, receiveValue: { promise(.success($0)) })
-                .store(in: &self.cancellables)
-        }
-    }
 }
