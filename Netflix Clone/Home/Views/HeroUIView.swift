@@ -6,14 +6,16 @@
 //
 
 import UIKit
+import Combine
 
 class HeroUIView: UIView {
+    private let viewModel = HomeViewModel()
+    var cancellables = Set<AnyCancellable>()
     
     private let heroImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true
-        imageView.image = UIImage(named: "heroImage")
         return imageView
     }()
     
@@ -43,10 +45,6 @@ class HeroUIView: UIView {
         button.configuration = config
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            button.widthAnchor.constraint(equalToConstant: 50)
-        ])
         return button
     }()
     
@@ -60,13 +58,7 @@ class HeroUIView: UIView {
         configuration.imagePadding = 10
         button.tintColor = .white
         button.configuration = configuration
-        
         button.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            button.widthAnchor.constraint(equalToConstant: 60)
-        ])
-        
         return button
     }()
     
@@ -79,12 +71,6 @@ class HeroUIView: UIView {
         button.configuration = config
         button.tintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
-        
-        
-        NSLayoutConstraint.activate([
-            button.widthAnchor.constraint(equalToConstant: 50)
-        ])
-        
         return button
     }()
     
@@ -94,6 +80,14 @@ class HeroUIView: UIView {
         addGradient()
         addSubview(buttonsStack)
         applyStackViewConstraints()
+        
+        viewModel.getPopularMovies()
+        viewModel.$popularMovies
+            .sink { [weak self] titles in
+                if titles.count > 0 {
+                    self?.setImage(path: titles[0].posterPath)
+                }
+            }.store(in: &cancellables)
     }
     
     func addGradient(){
@@ -109,11 +103,9 @@ class HeroUIView: UIView {
     private func applyStackViewConstraints() {
         NSLayoutConstraint.activate([
             buttonsStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            buttonsStack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
             buttonsStack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -30),
         ])
     }
-   
     
     override func layoutSubviews() {
         super.layoutSubviews()
@@ -122,5 +114,12 @@ class HeroUIView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setImage(path: String) {
+        guard let url = URL(string: ImageSize.original.url.appending(path)) else {
+            return
+        }
+        heroImageView.sd_setImage(with: url)
     }
 }
