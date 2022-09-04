@@ -8,17 +8,13 @@
 import UIKit
 import Combine
 
-enum Sections: Int {
-    case trendingMovies = 0
-}
-
 class HomeViewController: UIViewController {
     
     private let viewModel = HomeViewModel()
     private var titles = [Title]()
     var cancellables = Set<AnyCancellable>()
     
-    private let sectionTitles = ["Trending", "Popular", "Trending", "Top Rated"]
+    private let sectionTitles = ["Trending", "Top Rated", "Popular"]
 
     private let homeFeedTable: UITableView = {
         let table = UITableView(frame: .zero, style: .grouped)
@@ -36,12 +32,11 @@ class HomeViewController: UIViewController {
         homeFeedTable.dataSource = self
         
         configureNavBar()
+        loadFeedData()
         
         // Do any additional setup after loading the view.
         let headerView = HeroUIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 450))
         homeFeedTable.tableHeaderView = headerView
-        
-        loadFeedData()
     }
 
     override func viewDidLayoutSubviews() {
@@ -56,6 +51,8 @@ class HomeViewController: UIViewController {
     
     private func loadFeedData() {
         viewModel.getTrendingMovies()
+        viewModel.getPopularMovies()
+        viewModel.getTopRatedMovies()
         viewModel.$trendingMovies
             .sink(receiveValue: { [weak self] _ in
                 self?.homeFeedTable.reloadData()
@@ -82,6 +79,18 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         switch indexPath.section {
         case Sections.trendingMovies.rawValue:
             viewModel.$trendingMovies
+                .sink { titles in
+                    cell.configure(with: titles)
+                }
+                .store(in: &cancellables)
+        case Sections.popular.rawValue:
+            viewModel.$popularMovies
+                .sink { titles in
+                    cell.configure(with: titles)
+                }
+                .store(in: &cancellables)
+        case Sections.toprated.rawValue:
+            viewModel.$topRatedMovies
                 .sink { titles in
                     cell.configure(with: titles)
                 }
@@ -134,4 +143,10 @@ extension UIImage {
         
         return image.withRenderingMode(self.renderingMode)
     }
+}
+
+enum Sections: Int {
+    case trendingMovies = 0
+    case toprated = 1
+    case popular = 2
 }

@@ -22,7 +22,6 @@ final class TMDBServices {
             .mapError { _ in
                 TMDBNetworkError.invalidRequest
             }
-            .print()
             .flatMap { data, response -> AnyPublisher<Data, Error> in
                 guard let response = response as? HTTPURLResponse else {
                     return .fail(TMDBNetworkError.invalidResponse)
