@@ -10,7 +10,7 @@ import Foundation
 enum ImageSize {
     case small
     case original
-    var url: String {
+    var url: URL {
         switch self {
         case .small:
             return APIConstants.smallImageURL

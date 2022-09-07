@@ -117,9 +117,7 @@ class HeroUIView: UIView {
     }
     
     func setImage(path: String) {
-        guard let url = URL(string: ImageSize.original.url.appending(path)) else {
-            return
-        }
+        let url = ImageSize.original.url.appendingPathComponent(path)
         heroImageView.sd_setImage(with: url)
     }
 }

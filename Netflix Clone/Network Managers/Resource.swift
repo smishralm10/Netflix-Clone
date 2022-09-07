@@ -56,6 +56,15 @@ extension Resource {
         ]
         return Resource<Titles>(url: url, parameters: parameters)
     }
+    
+    static func upComing(type: TitleType) -> Resource<Titles> {
+        let url = APIConstants.baseURL.appendingPathComponent("/\(type.rawValue)/upcoming")
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey,
+            "region": "us"
+        ]
+        return Resource<Titles>(url: url, parameters: parameters)
+    }
 }
 
 enum TitleType: String {

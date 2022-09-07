@@ -32,9 +32,7 @@ class TitleCollectionViewCell: UICollectionViewCell {
     }
     
     func configure(model: String) {
-        guard let url = URL(string: ImageSize.small.url.appending(model)) else {
-            return
-        }
+        let url = ImageSize.small.url.appendingPathComponent(model)
         posterImageView.sd_setImage(with: url)
     }
 }
