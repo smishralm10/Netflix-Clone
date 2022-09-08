@@ -65,6 +65,24 @@ extension Resource {
         ]
         return Resource<Titles>(url: url, parameters: parameters)
     }
+    
+    static func discover(type: TitleType) -> Resource<Titles> {
+        let url = APIConstants.baseURL.appendingPathComponent("/discover/\(type.rawValue)")
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey,
+        ]
+        return Resource<Titles>(url: url, parameters: parameters)
+    }
+    
+    static func search(type: TitleType, query: String) -> Resource<Titles> {
+        let url = APIConstants.baseURL.appendingPathComponent("/search/\(type.rawValue)")
+        let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey,
+            "query": query,
+        ]
+        return Resource<Titles>(url: url, parameters: parameters)
+    }
 }
 
 enum TitleType: String {
