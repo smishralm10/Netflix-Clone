@@ -83,6 +83,16 @@ extension Resource {
         ]
         return Resource<Titles>(url: url, parameters: parameters)
     }
+    
+    static func searchYoutube(query: String) -> Resource<YoutubeSearchResponse> {
+        let url = APIConstants.youtubeBaseURL.appendingPathComponent("/search")
+        let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
+        let parameters: [String: CustomStringConvertible] = [
+            "key": APIConstants.youtubeApiKey,
+            "q": query,
+        ]
+        return Resource<YoutubeSearchResponse>(url: url, parameters: parameters)
+    }
 }
 
 enum TitleType: String {

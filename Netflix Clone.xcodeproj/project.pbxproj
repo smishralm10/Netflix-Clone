@@ -10,6 +10,9 @@
 		E109AF6328C5BB67005D94E0 /* ComingSoonViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E109AF6228C5BB67005D94E0 /* ComingSoonViewModel.swift */; };
 		E109AF6528C62F34005D94E0 /* Genre.swift in Sources */ = {isa = PBXBuildFile; fileRef = E109AF6428C62F34005D94E0 /* Genre.swift */; };
 		E10BA08728C758B1005D9939 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10BA08628C758B1005D9939 /* Utils.swift */; };
+		E10D7A6128CB1F7900225A4E /* model.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10D7A6028CB1F7900225A4E /* model.swift */; };
+		E10D7A6328CB304300225A4E /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10D7A6228CB304300225A4E /* DetailViewModel.swift */; };
+		E10D7A6528CB4F3A00225A4E /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10D7A6428CB4F3A00225A4E /* DetailViewController.swift */; };
 		E116AB5A28BF26EC0018CF7E /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = E116AB5928BF26EC0018CF7E /* Resource.swift */; };
 		E1233D9928C4F38A00C62C71 /* ComingSoonViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1233D9828C4F38900C62C71 /* ComingSoonViewController.swift */; };
 		E1233D9B28C4F4F300C62C71 /* ComingSoonTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1233D9A28C4F4F300C62C71 /* ComingSoonTableViewCell.swift */; };
@@ -61,6 +64,9 @@
 		E109AF6228C5BB67005D94E0 /* ComingSoonViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComingSoonViewModel.swift; sourceTree = "<group>"; };
 		E109AF6428C62F34005D94E0 /* Genre.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Genre.swift; sourceTree = "<group>"; };
 		E10BA08628C758B1005D9939 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		E10D7A6028CB1F7900225A4E /* model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = model.swift; sourceTree = "<group>"; };
+		E10D7A6228CB304300225A4E /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
+		E10D7A6428CB4F3A00225A4E /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		E116AB5928BF26EC0018CF7E /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		E1233D9828C4F38900C62C71 /* ComingSoonViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComingSoonViewController.swift; sourceTree = "<group>"; };
 		E1233D9A28C4F4F300C62C71 /* ComingSoonTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComingSoonTableViewCell.swift; sourceTree = "<group>"; };
@@ -120,6 +126,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E10D7A5F28CB1F4C00225A4E /* Detail */ = {
+			isa = PBXGroup;
+			children = (
+				E10D7A6028CB1F7900225A4E /* model.swift */,
+				E10D7A6228CB304300225A4E /* DetailViewModel.swift */,
+				E10D7A6428CB4F3A00225A4E /* DetailViewController.swift */,
+			);
+			path = Detail;
+			sourceTree = "<group>";
+		};
 		E12DC3FC28B88D8400A14EF7 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -163,6 +179,7 @@
 		E1C236FA2893D73A0039F870 /* Netflix Clone */ = {
 			isa = PBXGroup;
 			children = (
+				E10D7A5F28CB1F4C00225A4E /* Detail */,
 				E12DC3FC28B88D8400A14EF7 /* Utils */,
 				E13FBA0628AE174000EF5743 /* Network Managers */,
 				E1F8880B2895124D00F2EF2B /* Downloads */,
@@ -457,12 +474,15 @@
 				E1233D9928C4F38A00C62C71 /* ComingSoonViewController.swift in Sources */,
 				E13FBA0A28AE3AB100EF5743 /* Title.swift in Sources */,
 				E1F8881D289513BA00F2EF2B /* DownloadsViewController.swift in Sources */,
+				E10D7A6528CB4F3A00225A4E /* DetailViewController.swift in Sources */,
+				E10D7A6328CB304300225A4E /* DetailViewModel.swift in Sources */,
 				E1C237062893D73A0039F870 /* Netflix_Clone.xcdatamodeld in Sources */,
 				E1C237002893D73A0039F870 /* MainTabBarController.swift in Sources */,
 				E177523A28A8B31700D4F4AF /* CollectionViewTableViewCell.swift in Sources */,
 				E125C71028B7BDAE002B70B0 /* TitleCollectionViewCell.swift in Sources */,
 				E1F1059328C22026004BEE7E /* Publisher.swift in Sources */,
 				E177523C28A8CC0700D4F4AF /* HeroUIView.swift in Sources */,
+				E10D7A6128CB1F7900225A4E /* model.swift in Sources */,
 				E1276EF128B64E8E00301B55 /* HomeViewModel.swift in Sources */,
 				E1C236FC2893D73A0039F870 /* AppDelegate.swift in Sources */,
 				E1233D9B28C4F4F300C62C71 /* ComingSoonTableViewCell.swift in Sources */,

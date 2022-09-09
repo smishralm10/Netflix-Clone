@@ -76,6 +76,8 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
             return UITableViewCell()
         }
         
+        cell.delegate = self
+        
         switch indexPath.section {
         case Sections.trendingMovies.rawValue:
             viewModel.$trendingMovies
@@ -149,4 +151,12 @@ enum Sections: Int {
     case trendingMovies = 0
     case toprated = 1
     case popular = 2
+}
+
+extension HomeViewController: CollectionViewTableViewCellDelegate {
+    func collectionViewTableViewCellDidTap(_ cell: CollectionViewTableViewCell, viewController: UIViewController) {
+        DispatchQueue.main.async { [weak self] in
+            self?.navigationController?.pushViewController(viewController, animated: true)
+        }
+    }
 }
