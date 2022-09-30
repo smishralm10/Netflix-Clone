@@ -19,7 +19,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
-        window?.rootViewController = MainTabBarController()
+        
+        AuthorizationServiceProvider.shared
+            .getCredentialState { [weak self] authState, error in
+                switch authState {
+                case .authorized:
+                    self?.window?.rootViewController = MainTabBarController()
+                case .unauthorized:
+                    self?.window?.rootViewController = LoginViewController()
+                }
+            }
         window?.makeKeyAndVisible()
     }
 
@@ -52,6 +61,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Save changes in the application's managed object context when the application transitions to the background.
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
+    }
+    
+    func changeRootViewController(_ vc: UIViewController, animated: Bool = true) {
+        guard let window = self.window else {
+            return
+        }
+        
+        // change the root view controller to your specific view controller
+        window.rootViewController = vc
     }
 
 

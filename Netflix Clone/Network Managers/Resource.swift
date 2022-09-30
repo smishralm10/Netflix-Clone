@@ -11,6 +11,7 @@ import Foundation
 struct Resource<T: Decodable> {
     let url: URL
     let parameters: [String: CustomStringConvertible]
+    var body: [String: Any]?
     var request: URLRequest? {
         guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             return nil
@@ -21,12 +22,31 @@ struct Resource<T: Decodable> {
         guard let url = components.url else {
             return nil
         }
-        return URLRequest(url: url)
+        
+        var request = URLRequest(url: url)
+        
+        guard let body = body else {
+            return request
+        }
+        
+        let bodyData = try? JSONSerialization.data(withJSONObject: body, options: [])
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = "POST"
+        request.httpBody = bodyData
+            
+        return request
     }
+    
 
     init(url: URL, parameters: [String: CustomStringConvertible] = [:]) {
         self.url = url
         self.parameters = parameters
+    }
+    
+    init(url: URL, parameters: [String: CustomStringConvertible] = [:], body: [String: Any]) {
+        self.url = url
+        self.parameters = parameters
+        self.body = body
     }
 }
 
@@ -82,6 +102,48 @@ extension Resource {
             "query": query,
         ]
         return Resource<Titles>(url: url, parameters: parameters)
+    }
+    
+    static func searchYoutube(query: String) -> Resource<YoutubeSearchResponse> {
+        let url = APIConstants.youtubeBaseURL.appendingPathComponent("/search")
+        let query = query.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
+        let parameters: [String: CustomStringConvertible] = [
+            "key": APIConstants.youtubeApiKey,
+            "q": query,
+        ]
+        return Resource<YoutubeSearchResponse>(url: url, parameters: parameters)
+    }
+    
+    static func generateRequestToken() -> Resource<LoginResponse> {
+        let url = APIConstants.baseURL.appendingPathComponent("/authentication/token/new")
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey,
+        ]
+        return Resource<LoginResponse>(url: url, parameters: parameters)
+    }
+    
+    static func validateTokenWithLogin(requestToken: String, username: String, password: String) -> Resource<LoginResponse> {
+        let url = APIConstants.baseURL.appendingPathComponent("/authentication/token/validate_with_login")
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey,
+        ]
+        let body = [
+            "username": username,
+            "password": password,
+            "request_token": requestToken
+        ]
+        return Resource<LoginResponse>(url: url, parameters: parameters, body: body)
+    }
+    
+    static func createSession(requestToken: String) -> Resource<LoginResponse> {
+        let url = APIConstants.baseURL.appendingPathComponent("/authentication/session/new")
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey,
+        ]
+        let body = [
+            "request_token": requestToken
+        ]
+        return Resource<LoginResponse>(url: url, parameters: parameters, body: body)
     }
 }
 

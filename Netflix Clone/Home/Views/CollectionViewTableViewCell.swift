@@ -6,10 +6,21 @@
 //
 
 import UIKit
+import Combine
+
+protocol CollectionViewTableViewCellDelegate: AnyObject {
+    func collectionViewTableViewCellDidTap(_ cell: CollectionViewTableViewCell, viewController: UIViewController)
+}
 
 class CollectionViewTableViewCell: UITableViewCell {
     
+    private let viewModel = DetailViewModel()
+    private var cancellables = Set<AnyCancellable>()
+    
     static let identifer = "CollectionViewTableViewCell"
+    
+    weak var delegate: CollectionViewTableViewCellDelegate?
+    
     private var titles = [Title]()
     
     private let collectionView: UICollectionView = {
@@ -56,5 +67,14 @@ extension CollectionViewTableViewCell: UICollectionViewDelegate, UICollectionVie
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return titles.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let detailVC = DetailViewController()
+        
+        let titleDetail = titles[indexPath.row]
+        detailVC.configure(with: titleDetail)
+        self.delegate?.collectionViewTableViewCellDidTap(self, viewController: detailVC)
     }
 }

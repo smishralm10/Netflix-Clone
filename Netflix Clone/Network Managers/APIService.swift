@@ -40,7 +40,9 @@ final class TMDBServices {
 
 struct APIConstants {
     static let baseURL = URL(string: "https://api.themoviedb.org/3")!
+    static let youtubeBaseURL = URL(string: "https://youtube.googleapis.com/youtube/v3")!
     static let apiKey = "802fcb321a47d6f99d3e410229ff2f35"
+    static let youtubeApiKey = "AIzaSyC5W0c6dHOnAlGmPubY-i7IUM9mJo12Fzk"
     static let smallImageURL = URL(string: "https://image.tmdb.org/t/p/w500/")!
     static let originalImageURL = URL(string: "https://image.tmdb.org/t/p/original")!
 }
