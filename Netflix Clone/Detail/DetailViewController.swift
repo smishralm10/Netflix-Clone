@@ -6,20 +6,20 @@
 //
 
 import UIKit
-import WebKit
 import Combine
 
 class DetailViewController: UIViewController {
     
     var titleDetail = PassthroughSubject<Title, Never>()
-    var videoId = PassthroughSubject<VideoID, Never>()
     
     private var cancellables = Set<AnyCancellable>()
-    
-    private let webView: WKWebView = {
-        let webView = WKWebView()
-        webView.translatesAutoresizingMaskIntoConstraints = false
-        return webView
+
+    private let posterImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
     }()
     
     private let titleLabel: UILabel = {
@@ -32,36 +32,28 @@ class DetailViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.addSubview(webView)
+        
+        view.addSubview(posterImageView)
         view.addSubview(titleLabel)
         
         applyConstraints()
-        configure()
     }
 
-    private func configure() {
-        titleDetail.sink { [weak self] title in
-            self?.titleLabel.text = title.title
-        }
-        .store(in: &cancellables)
-        
-        videoId.sink { [weak self] videoId in
-            let url = URL(string: "https://youtube.com/embed/\(videoId.videoId)")!
-            self?.webView.load(URLRequest(url: url))
-        }
-        .store(in: &cancellables)
+    public func configure(with title: Title) {
+            let url = ImageSize.original.url.appendingPathComponent(title.posterPath)
+            self.posterImageView.sd_setImage(with: url)
+            self.titleLabel.text = title.title
     }
     
     private func applyConstraints() {
         NSLayoutConstraint.activate([
-            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
-            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
-            webView.topAnchor.constraint(equalTo: view.topAnchor, constant: 0),
-            webView.widthAnchor.constraint(equalToConstant: view.bounds.width),
-            webView.heightAnchor.constraint(equalToConstant: 300),
+            posterImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 100),
+            posterImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
+            posterImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
+            posterImageView.heightAnchor.constraint(equalToConstant: 250),
             
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-            titleLabel.topAnchor.constraint(equalTo: webView.bottomAnchor, constant: -10),
+            titleLabel.topAnchor.constraint(equalTo: posterImageView.bottomAnchor, constant: 12),
         ])
     }
 }

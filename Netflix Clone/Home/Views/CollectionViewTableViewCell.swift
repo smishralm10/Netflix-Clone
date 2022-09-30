@@ -74,17 +74,7 @@ extension CollectionViewTableViewCell: UICollectionViewDelegate, UICollectionVie
         let detailVC = DetailViewController()
         
         let titleDetail = titles[indexPath.row]
-        
-        viewModel.getYoutubeSearchResults(for: titleDetail.title)
-        viewModel.$youtubeSearchResults
-            .sink { items in
-                if items.count > 0 {
-                    detailVC.videoId.send(items[0].id)
-                    detailVC.titleDetail.send(titleDetail)
-                }
-            }
-            .store(in: &cancellables)
-        
+        detailVC.configure(with: titleDetail)
         self.delegate?.collectionViewTableViewCellDidTap(self, viewController: detailVC)
     }
 }
