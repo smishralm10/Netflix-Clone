@@ -25,6 +25,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 switch authState {
                 case .authorized:
                     self?.window?.rootViewController = MainTabBarController()
+                    
                 case .unauthorized:
                     self?.window?.rootViewController = LoginViewController()
                 }

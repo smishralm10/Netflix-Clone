@@ -33,4 +33,11 @@ final class LoginViewModel {
             .receive(on: RunLoop.main)
             .eraseToAnyPublisher()
     }
+    
+    func getUserAccount() -> AnyPublisher<User, Error> {
+        return TMDBServices.shared
+            .load(Resource<User>.getUserAccount())
+            .receive(on: RunLoop.main)
+            .eraseToAnyPublisher()
+    }
 }
