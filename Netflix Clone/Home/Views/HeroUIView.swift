@@ -9,8 +9,9 @@ import UIKit
 import Combine
 
 class HeroUIView: UIView {
-    private let viewModel = HomeViewModel()
+    private var viewModel: HomeViewModel
     var cancellables = Set<AnyCancellable>()
+    var title: Title?
     
     private let heroImageView: UIImageView = {
         let imageView = UIImageView()
@@ -36,14 +37,18 @@ class HeroUIView: UIView {
         return stackView
     }()
     
-    private let addButton: UIButton = {
+    private lazy var addButton: UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton()
-        let image = UIImage(systemName: "plus")?.withRenderingMode(.alwaysTemplate)
-        config.image = image
+        let addImage = UIImage(systemName: "plus")?.withRenderingMode(.alwaysTemplate)
+        let addedImage = UIImage(systemName: "checkmark")?.withRenderingMode(.alwaysTemplate)
         config.imagePadding = 10
+        config.background.backgroundColor = .clear
         button.configuration = config
+        button.setImage(addImage, for: .normal)
+        button.setImage(addedImage, for: .selected)
         button.tintColor = .white
+        button.addTarget(self, action: #selector(self.addTitleToWatchList), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -74,18 +79,32 @@ class HeroUIView: UIView {
         return button
     }()
     
-    override init(frame: CGRect) {
+    init(frame: CGRect, viewModel: HomeViewModel) {
+        self.viewModel = viewModel
         super.init(frame: frame)
+        
         addSubview(heroImageView)
         addGradient()
         addSubview(buttonsStack)
         applyStackViewConstraints()
         
+        viewModel.getWatchList()
         viewModel.getPopularMovies()
+        viewModel.$watchList
+            .sink { [weak self] titles in
+                for title in titles {
+                    if title.id == self?.title?.id {
+                        self?.addButton.isSelected = true
+                    }
+                }
+            }
+            .store(in: &cancellables)
+        
         viewModel.$popularMovies
             .sink { [weak self] titles in
                 if titles.count > 0 {
                     self?.setImage(path: titles[0].posterPath)
+                    self?.title = titles[0]
                 }
             }.store(in: &cancellables)
     }
@@ -119,5 +138,37 @@ class HeroUIView: UIView {
     func setImage(path: String) {
         let url = ImageSize.original.url.appendingPathComponent(path)
         heroImageView.sd_setImage(with: url)
+    }
+    
+    
+    @objc func addTitleToWatchList(_ sender: UIButton) {
+        guard let title = title else {
+            return
+        }
+        
+        if sender.isSelected {
+            viewModel.addToWatchList(media_Id: title.id, type: .movie, add: false)
+                .sink { completion in
+                    if case let .failure(error) = completion {
+                        print(error.localizedDescription)
+                    }
+                } receiveValue: { [weak self] response in
+                    sender.isSelected.toggle()
+                    self?.viewModel.addOrRemoveTitle(title: title, add: false)
+                }
+                .store(in: &cancellables)
+            
+        } else {
+            viewModel.addToWatchList(media_Id: title.id, type: .movie, add: true)
+                .sink { completion in
+                    if case let .failure(error) = completion {
+                        print(error.localizedDescription)
+                    }
+                } receiveValue: { [weak self] response in
+                    sender.isSelected.toggle()
+                    self?.viewModel.addOrRemoveTitle(title: title, add: true)
+                }
+                .store(in: &cancellables)
+        }
     }
 }

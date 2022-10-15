@@ -6,21 +6,15 @@
 //
 
 import Foundation
+import Combine
 
 final class AuthorizationServiceProvider {
+    private var cancellables = Set<AnyCancellable>()
     static let shared = AuthorizationServiceProvider()
     private var authorizationState: AuthorizationState = .unauthorized
     private var error: String?
-    private var _sessionId: String?
-    var sessionId: String {
-        get {
-            return _sessionId!
-        }
-        
-        set(sessionId) {
-            _sessionId = sessionId
-        }
-    }
+    var user: User?
+    var sessionId: String?
     
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -43,10 +37,22 @@ final class AuthorizationServiceProvider {
             handler(.unauthorized, "Request token expired")
             return
         }
-
+        
         sessionId = user["sessionId"]!
-        authorizationState = .authorized
-        handler(.authorized, nil)
+       
+        if self.user == nil {
+            LoginViewModel().getUserAccount()
+                .sink { completion in
+                    if case let .failure(error) = completion {
+                        LoginViewController().showAlert(title: "Account Error", message: error.localizedDescription)
+                    }
+                } receiveValue: { [weak self] user in
+                    self?.user = user
+                    self?.authorizationState = .authorized
+                    handler(.authorized, nil)
+                }
+                .store(in: &cancellables)
+        }
     }
 }
 

@@ -24,3 +24,19 @@ struct LoginResponse: Decodable {
         case sessionId = "session_id"
     }
 }
+
+struct WatchListResponse: Decodable {
+    let statusCode: Int?
+    let statusMessage: String?
+    
+    enum CodingKeys: String, CodingKey {
+        case statusCode = "status_code"
+        case statusMessage = "status_message"
+    }
+}
+
+struct User: Codable {
+    let id: Int
+    let name: String
+    let username: String
+}

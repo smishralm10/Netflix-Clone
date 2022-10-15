@@ -171,9 +171,18 @@ class LoginViewController: UIViewController {
                                 "sessionId": sessionId
                             ]
                             UserDefaults.standard.set(userData, forKey: "currentUser")
-                            let mainTabBarController = MainTabBarController()
-                            (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootViewController(mainTabBarController)
-                            self.stopLoadingAnimation()
+                            LoginViewModel().getUserAccount()
+                                .sink { completion in
+                                    if case let .failure(error) = completion {
+                                        self.showAlert(title: "No Account", message: error.localizedDescription)
+                                    }
+                                } receiveValue: { user in
+                                    AuthorizationServiceProvider.shared.user = user
+                                    let mainTabBarController = MainTabBarController()
+                                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootViewController(mainTabBarController)
+                                    self.stopLoadingAnimation()
+                                }
+                                .store(in: &self.cancellables)
                         }
                     }
                     .store(in: &self.cancellables)

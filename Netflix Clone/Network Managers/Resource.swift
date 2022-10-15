@@ -36,7 +36,6 @@ struct Resource<T: Decodable> {
             
         return request
     }
-    
 
     init(url: URL, parameters: [String: CustomStringConvertible] = [:]) {
         self.url = url
@@ -144,6 +143,43 @@ extension Resource {
             "request_token": requestToken
         ]
         return Resource<LoginResponse>(url: url, parameters: parameters, body: body)
+    }
+    
+    static func getUserAccount() -> Resource<User> {
+        let url = APIConstants.baseURL.appendingPathComponent("/account")
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey,
+            "session_id": AuthorizationServiceProvider.shared.sessionId!
+        ]
+        
+        return Resource<User>(url: url, parameters: parameters)
+    }
+    
+    static func getWatchList() -> Resource<Titles> {
+        let user = AuthorizationServiceProvider.shared.user!
+        let url = APIConstants.baseURL.appendingPathComponent("/account/\(user.id)/watchlist/movies")
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey,
+            "session_id": AuthorizationServiceProvider.shared.sessionId!
+        ]
+        return Resource<Titles>(url: url, parameters: parameters)
+    }
+    
+    static func addTitleToWatchList(media_Id: Int, type: TitleType, add: Bool) -> Resource<WatchListResponse> {
+        let user = AuthorizationServiceProvider.shared.user!
+        let url = APIConstants.baseURL.appendingPathComponent("/account/\(user.id)/watchlist")
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey,
+            "session_id": AuthorizationServiceProvider.shared.sessionId!
+        ]
+        
+        let body : [String: Any] = [
+            "media_type": type.rawValue,
+            "media_id": media_Id,
+            "watchlist": add
+        ]
+        
+        return Resource<WatchListResponse>(url: url, parameters: parameters, body: body)
     }
 }
 

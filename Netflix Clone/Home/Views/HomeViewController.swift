@@ -11,10 +11,11 @@ import Combine
 class HomeViewController: UIViewController {
     
     private let viewModel = HomeViewModel()
-    private var titles = [Title]()
     var cancellables = Set<AnyCancellable>()
+    private var watchListTitles = [Title]()
     
-    private let sectionTitles = ["Trending", "Top Rated", "Popular"]
+    private var sectionTitles = ["Trending", "Top Rated", "Popular"]
+    private var sectionTitles2 = ["Trending", "Top Rated", "Popular", "My List"]
 
     private let homeFeedTable: UITableView = {
         let table = UITableView(frame: .zero, style: .grouped)
@@ -32,11 +33,12 @@ class HomeViewController: UIViewController {
         homeFeedTable.dataSource = self
         
         configureNavBar()
-        loadFeedData()
         
         // Do any additional setup after loading the view.
-        let headerView = HeroUIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 450))
+        let headerView = HeroUIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 450), viewModel: viewModel)
         homeFeedTable.tableHeaderView = headerView
+        
+        loadFeedData()
     }
 
     override func viewDidLayoutSubviews() {
@@ -53,10 +55,12 @@ class HomeViewController: UIViewController {
         viewModel.getTrendingMovies()
         viewModel.getPopularMovies()
         viewModel.getTopRatedMovies()
-        viewModel.$trendingMovies
-            .sink(receiveValue: { [weak self] _ in
+        viewModel.getWatchList()
+        viewModel.$watchList
+            .sink { [weak self] titles in
+                self?.watchListTitles = titles
                 self?.homeFeedTable.reloadData()
-            })
+            }
             .store(in: &cancellables)
     }
 }
@@ -64,6 +68,9 @@ class HomeViewController: UIViewController {
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     
     func numberOfSections(in tableView: UITableView) -> Int {
+        if watchListTitles.count > 0 {
+            return sectionTitles2.count
+        }
         return sectionTitles.count
     }
     
@@ -97,6 +104,12 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
                     cell.configure(with: titles)
                 }
                 .store(in: &cancellables)
+        case Sections.watchList.rawValue:
+            viewModel.$watchList
+                .sink { titles in
+                    cell.configure(with: titles)
+                }
+                .store(in: &cancellables)
         default:
             return UITableViewCell()
             
@@ -114,13 +127,16 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        if watchListTitles.count > 0 {
+            return sectionTitles2[section]
+        }
         return sectionTitles[section]
     }
     
     func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         guard let header = view as? UITableViewHeaderFooterView else {return}
         var content = header.defaultContentConfiguration()
-        content.text = sectionTitles[section].capitalized
+        content.text = watchListTitles.count > 0 ? sectionTitles2[section] : sectionTitles[section]
         content.textProperties.font = .systemFont(ofSize: 18, weight: .semibold)
         content.textProperties.color = .white
         header.contentConfiguration = content
@@ -151,6 +167,7 @@ enum Sections: Int {
     case trendingMovies = 0
     case toprated = 1
     case popular = 2
+    case watchList = 3
 }
 
 extension HomeViewController: CollectionViewTableViewCellDelegate {
@@ -160,3 +177,4 @@ extension HomeViewController: CollectionViewTableViewCellDelegate {
         }
     }
 }
+
