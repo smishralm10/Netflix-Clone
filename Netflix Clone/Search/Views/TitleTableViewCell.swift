@@ -59,7 +59,7 @@ class TitleTableViewCell: UITableViewCell {
         fatalError()
     }
     
-    func configureCell(title: Title) {
+    func bind(to title: Title) {
         let url = ImageSize.small.url.appendingPathComponent(title.posterPath)
         posterImageView.sd_setImage(with: url)
         titleLabel.text = title.title

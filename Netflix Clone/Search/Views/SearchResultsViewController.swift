@@ -10,7 +10,7 @@ import Combine
 
 class SearchResultsViewController: UIViewController {
     
-    @Published var searchResultsTitles = [Title]()
+    private var searchResultsTitles = [Title]()
     
     private let searchResultsCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -28,7 +28,6 @@ class SearchResultsViewController: UIViewController {
         
         searchResultsCollectionView.delegate = self
         searchResultsCollectionView.dataSource = self
-        
     }
     
     override func viewDidLayoutSubviews() {
@@ -36,7 +35,7 @@ class SearchResultsViewController: UIViewController {
         searchResultsCollectionView.frame = view.bounds
     }
     
-    func populateSearchResults(titles: [Title]) {
+    public func bind(with titles: [Title]) {
         searchResultsTitles = titles
         searchResultsCollectionView.reloadData()
     }

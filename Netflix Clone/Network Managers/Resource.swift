@@ -181,6 +181,15 @@ extension Resource {
         
         return Resource<WatchListResponse>(url: url, parameters: parameters, body: body)
     }
+    
+    static func details(id: Int) -> Resource<Title> {
+        let url = APIConstants.baseURL.appendingPathComponent("/movie/\(id)")
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey
+        ]
+        
+        return Resource<Title>(url: url, parameters: parameters)
+    }
 }
 
 enum TitleType: String {

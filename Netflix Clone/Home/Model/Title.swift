@@ -25,3 +25,13 @@ struct Title: Decodable {
         case releaseDate = "release_date"
     }
 }
+
+extension Title: Hashable {
+    static func == (lhs: Title, rhs: Title) -> Bool {
+        return lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}

@@ -13,7 +13,7 @@ class ComingSoonViewModel {
     @Published var upComingMovies = [Title]()
     
     func getUpComingMovies() {
-        TMDBServices.shared
+        NetworkService.shared
             .load(Resource<[Title]>.upComing(type: .movie))
             .receive(on: RunLoop.main)
             .sink { completion in

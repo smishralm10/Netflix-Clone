@@ -16,7 +16,7 @@ class HomeViewModel {
     @Published var watchList = [Title]()
     
     func getTrendingMovies() {
-        TMDBServices.shared
+        NetworkService.shared
             .load(Resource<[Title]>.trending(type: .movie))
             .receive(on: RunLoop.main)
             .sink { completion in
@@ -30,7 +30,7 @@ class HomeViewModel {
     }
     
     func getPopularMovies() {
-        TMDBServices.shared
+        NetworkService.shared
             .load(Resource<[Title]>.popular(type: .movie))
             .receive(on: RunLoop.main)
             .sink { completion in
@@ -44,7 +44,7 @@ class HomeViewModel {
     }
     
     func getTopRatedMovies() {
-        TMDBServices.shared
+        NetworkService.shared
             .load(Resource<[Title]>.topRated(type: .movie))
             .receive(on: RunLoop.main)
             .sink { completion in
@@ -58,7 +58,7 @@ class HomeViewModel {
     }
     
     func getWatchList() {
-        TMDBServices.shared
+        NetworkService.shared
             .load(Resource<[Title]>.getWatchList())
             .receive(on: RunLoop.main)
             .map({ titles in
@@ -75,7 +75,7 @@ class HomeViewModel {
     }
     
     func addToWatchList(media_Id: Int, type: TitleType, add: Bool) -> AnyPublisher<WatchListResponse, Error> {
-         return TMDBServices.shared
+         return NetworkService.shared
             .load(Resource<WatchListResponse>.addTitleToWatchList(media_Id: media_Id, type: type, add: add))
             .receive(on: RunLoop.main)
             .map({ response in

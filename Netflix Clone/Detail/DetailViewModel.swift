@@ -13,7 +13,7 @@ final class DetailViewModel {
     var cancellables = Set<AnyCancellable>()
     
     func getYoutubeSearchResults(for query: String) {
-        TMDBServices.shared
+        NetworkService.shared
             .load(Resource<[VideoElement]>.searchYoutube(query: query))
             .receive(on: RunLoop.main)
             .sink { completion in
