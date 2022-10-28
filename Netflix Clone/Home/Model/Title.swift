@@ -16,11 +16,12 @@ struct Title: Decodable {
     let title: String
     let posterPath: String
     let overview: String
-    let genreIds: [Int]
+    let genreIds: [GenreId]?
+    let genres: [Genre]?
     let releaseDate: String
     
     enum CodingKeys: String, CodingKey {
-        case id, title, overview, posterPath = "poster_path"
+        case id, title, overview, genres, posterPath = "poster_path"
         case genreIds = "genre_ids"
         case releaseDate = "release_date"
     }

@@ -11,6 +11,7 @@ import Combine
 class SearchResultsViewController: UIViewController {
     
     private var searchResultsTitles = [Title]()
+    private let selectListener: PassthroughSubject<Int, Never>
     
     private let searchResultsCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -21,6 +22,15 @@ class SearchResultsViewController: UIViewController {
         collectionView.register(TitleCollectionViewCell.self, forCellWithReuseIdentifier: TitleCollectionViewCell.identifier)
         return collectionView
     }()
+    
+    init(selectListener: PassthroughSubject<Int, Never>) {
+        self.selectListener = selectListener
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init(coder: NSCoder) {
+        fatalError("Not Supported")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,5 +64,10 @@ extension SearchResultsViewController: UICollectionViewDelegate, UICollectionVie
         
         cell.configure(model: searchResultsTitles[indexPath.row].posterPath)
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        selectListener.send(searchResultsTitles[indexPath.row].id)
+        collectionView.deselectItem(at: indexPath, animated: true)
     }
 }

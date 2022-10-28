@@ -26,6 +26,9 @@ extension ApplicationComponentsFactory: ApplicationFlowCoordinatorDependencyProv
     }
     
     func titleDetailController(_ id: Int) -> UIViewController {
-        return UIViewController()
+        let useCase = SearchTitleUseCase(networkService: self.networkService)
+        let viewModel = DetailViewModel(titleId: id, useCase: useCase)
+        let viewController = DetailViewController(viewModel: viewModel)
+        return viewController
     }
 }

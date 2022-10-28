@@ -8,21 +8,30 @@
 import Foundation
 import Combine
 
-final class DetailViewModel {
-    @Published var youtubeSearchResults = [VideoElement]()
-    var cancellables = Set<AnyCancellable>()
+final class DetailViewModel : TitleDetailsViewModelType {
+    let titleId: Int
+    let useCase: SearchTitleUseCaseType
     
-    func getYoutubeSearchResults(for query: String) {
-        NetworkService.shared
-            .load(Resource<[VideoElement]>.searchYoutube(query: query))
-            .receive(on: RunLoop.main)
-            .sink { completion in
-                if case let .failure(error) = completion {
-                    print(error.localizedDescription)
-                }
-            } receiveValue: { [weak self] results in
-                self?.youtubeSearchResults = results.items
+    init(titleId: Int, useCase: SearchTitleUseCaseType) {
+        self.titleId = titleId
+        self.useCase = useCase
+    }
+    
+    func transform(input: TitleDetailsViewModelInput) -> TitleDetailsViewModelOutput {
+        let titleDetails = input.appear
+            .flatMapLatest { [unowned self] _ in
+                self.useCase.titleDetails(with: titleId)
             }
-            .store(in: &cancellables)
+            .map({ result -> TitleDetailsState in
+                switch result {
+                case .success(let title): return .success(title)
+                case .failure(let error): return .failure(error)
+                }
+            })
+            .eraseToAnyPublisher()
+        
+        let loading: TitleDetailsViewModelOutput = input.appear.map({ _ in .loading }).eraseToAnyPublisher()
+        
+        return Publishers.Merge(loading, titleDetails).removeDuplicates().eraseToAnyPublisher()
     }
 }

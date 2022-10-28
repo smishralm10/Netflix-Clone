@@ -17,8 +17,8 @@ class SearchViewController: UIViewController {
     private let appear = PassthroughSubject<Void, Never>()
     private var topTitles = [Title]()
     
-    private let searchController: UISearchController = {
-        let searchController = UISearchController(searchResultsController: SearchResultsViewController())
+    private lazy var searchController: UISearchController = {
+        let searchController = UISearchController(searchResultsController: SearchResultsViewController(selectListener: self.selection))
         searchController.searchBar.placeholder = "Search a Movie or TV Show"
         searchController.searchBar.searchBarStyle = .minimal
         return searchController
@@ -135,6 +135,11 @@ extension SearchViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         100
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        selection.send(topTitles[indexPath.row].id)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
 
