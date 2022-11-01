@@ -26,6 +26,11 @@
 		E132874428E2C8B3008BBFD4 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E132874328E2C8B3008BBFD4 /* LoginViewModel.swift */; };
 		E132874728E2CBEF008BBFD4 /* AuthorizationServiceProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E132874628E2CBEF008BBFD4 /* AuthorizationServiceProvider.swift */; };
 		E132874928E32C2E008BBFD4 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = E132874828E32C2E008BBFD4 /* Model.swift */; };
+		E1341EB62910F088008712B2 /* HomeFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1341EB52910F088008712B2 /* HomeFlowCoordinator.swift */; };
+		E1341EB82910F29D008712B2 /* ComingSoonFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1341EB72910F29D008712B2 /* ComingSoonFlowCoordinator.swift */; };
+		E1341EBA2910F6CD008712B2 /* DownloadFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1341EB92910F6CD008712B2 /* DownloadFlowCoordinator.swift */; };
+		E1341EBE29112958008712B2 /* ComingSoonUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1341EBD29112958008712B2 /* ComingSoonUseCase.swift */; };
+		E1341EC02911324D008712B2 /* ComingSoonViewModelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1341EBF2911324D008712B2 /* ComingSoonViewModelType.swift */; };
 		E13D47DD290AA4DD001118A5 /* TitleViewModelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E13D47DC290AA4DD001118A5 /* TitleViewModelType.swift */; };
 		E13D47DF290AC87B001118A5 /* Genre.swift in Sources */ = {isa = PBXBuildFile; fileRef = E13D47DE290AC87B001118A5 /* Genre.swift */; };
 		E13FBA0828AE17DF00EF5743 /* APIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E13FBA0728AE17DF00EF5743 /* APIService.swift */; };
@@ -92,6 +97,11 @@
 		E132874328E2C8B3008BBFD4 /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		E132874628E2CBEF008BBFD4 /* AuthorizationServiceProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationServiceProvider.swift; sourceTree = "<group>"; };
 		E132874828E32C2E008BBFD4 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		E1341EB52910F088008712B2 /* HomeFlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeFlowCoordinator.swift; sourceTree = "<group>"; };
+		E1341EB72910F29D008712B2 /* ComingSoonFlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComingSoonFlowCoordinator.swift; sourceTree = "<group>"; };
+		E1341EB92910F6CD008712B2 /* DownloadFlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadFlowCoordinator.swift; sourceTree = "<group>"; };
+		E1341EBD29112958008712B2 /* ComingSoonUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComingSoonUseCase.swift; sourceTree = "<group>"; };
+		E1341EBF2911324D008712B2 /* ComingSoonViewModelType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComingSoonViewModelType.swift; sourceTree = "<group>"; };
 		E13D47DC290AA4DD001118A5 /* TitleViewModelType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleViewModelType.swift; sourceTree = "<group>"; };
 		E13D47DE290AC87B001118A5 /* Genre.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Genre.swift; sourceTree = "<group>"; };
 		E13FBA0728AE17DF00EF5743 /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
@@ -202,6 +212,9 @@
 				E1694C842903D6B2006DCB48 /* FlowCoordinator.swift */,
 				E1694C862903DE75006DCB48 /* ApplicationFlowCoordinator.swift */,
 				E1694C882903DF2E006DCB48 /* TitleSearchFlowCoordinator.swift */,
+				E1341EB52910F088008712B2 /* HomeFlowCoordinator.swift */,
+				E1341EB72910F29D008712B2 /* ComingSoonFlowCoordinator.swift */,
+				E1341EB92910F6CD008712B2 /* DownloadFlowCoordinator.swift */,
 			);
 			path = FlowCoordinators;
 			sourceTree = "<group>";
@@ -356,6 +369,7 @@
 			isa = PBXGroup;
 			children = (
 				E109AF6228C5BB67005D94E0 /* ComingSoonViewModel.swift */,
+				E1341EBF2911324D008712B2 /* ComingSoonViewModelType.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -398,6 +412,7 @@
 			isa = PBXGroup;
 			children = (
 				E1FC00D028FFC9A000A469B0 /* SearchTitleUseCase.swift */,
+				E1341EBD29112958008712B2 /* ComingSoonUseCase.swift */,
 			);
 			path = UseCases;
 			sourceTree = "<group>";
@@ -541,6 +556,7 @@
 			files = (
 				E187EFCA28E193BA0024CBBD /* LoginViewController.swift in Sources */,
 				E1F888172895136000F2EF2B /* HomeViewController.swift in Sources */,
+				E1341EBE29112958008712B2 /* ComingSoonUseCase.swift in Sources */,
 				E116AB5A28BF26EC0018CF7E /* Resource.swift in Sources */,
 				E1F8881B289513A600F2EF2B /* SearchViewController.swift in Sources */,
 				E1EB5E8828C8C7210084482D /* SearchResultsViewController.swift in Sources */,
@@ -555,8 +571,10 @@
 				E10D7A6528CB4F3A00225A4E /* DetailViewController.swift in Sources */,
 				E10D7A6328CB304300225A4E /* DetailViewModel.swift in Sources */,
 				E1C237062893D73A0039F870 /* Netflix_Clone.xcdatamodeld in Sources */,
+				E1341EBA2910F6CD008712B2 /* DownloadFlowCoordinator.swift in Sources */,
 				E1C237002893D73A0039F870 /* MainTabBarController.swift in Sources */,
 				E1694C832903D214006DCB48 /* FlowCoordinatorDependencyProviders.swift in Sources */,
+				E1341EB82910F29D008712B2 /* ComingSoonFlowCoordinator.swift in Sources */,
 				E177523A28A8B31700D4F4AF /* CollectionViewTableViewCell.swift in Sources */,
 				E125C71028B7BDAE002B70B0 /* TitleCollectionViewCell.swift in Sources */,
 				E1F1059328C22026004BEE7E /* Extension.swift in Sources */,
@@ -574,7 +592,9 @@
 				E12C7ED629000989008B9AE0 /* SearchTitleViewModelType.swift in Sources */,
 				E1C236FC2893D73A0039F870 /* AppDelegate.swift in Sources */,
 				E132874428E2C8B3008BBFD4 /* LoginViewModel.swift in Sources */,
+				E1341EB62910F088008712B2 /* HomeFlowCoordinator.swift in Sources */,
 				E1233D9B28C4F4F300C62C71 /* ComingSoonTableViewCell.swift in Sources */,
+				E1341EC02911324D008712B2 /* ComingSoonViewModelType.swift in Sources */,
 				E1EB5E8C28C8E1D30084482D /* SearchViewModel.swift in Sources */,
 				E10BA08728C758B1005D9939 /* Utils.swift in Sources */,
 				E13FBA0828AE17DF00EF5743 /* APIService.swift in Sources */,

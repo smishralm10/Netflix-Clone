@@ -42,7 +42,6 @@ protocol TitleSearchViewModelType: AnyObject {
 }
 
 
-protocol TitleSearchNavigator: AnyObject {
-    
+protocol TitleNavigator: AnyObject {
     func showDetails(forTitle Id: Int)
 }

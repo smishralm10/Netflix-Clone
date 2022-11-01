@@ -103,7 +103,7 @@ class HeroUIView: UIView {
         viewModel.$popularMovies
             .sink { [weak self] titles in
                 if titles.count > 0 {
-                    self?.setImage(path: titles[0].posterPath)
+//                    self?.setImage(path: titles[0].posterPath)
                     self?.title = titles[0]
                 }
             }.store(in: &cancellables)

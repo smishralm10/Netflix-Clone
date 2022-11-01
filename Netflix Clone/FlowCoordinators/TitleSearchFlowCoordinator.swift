@@ -9,26 +9,23 @@ import Foundation
 import UIKit
 
 class TitleSearchFlowCoordinator: FlowCoordinator {
-    fileprivate let window: UIWindow
-    fileprivate var searchNavigationController: UINavigationController?
+    internal var navigationController: UINavigationController?
     fileprivate let dependencyProvider: TitleSearchFlowCoordinatorDependencyProvider
     
-    init(window: UIWindow, dependencyProvider: TitleSearchFlowCoordinatorDependencyProvider) {
-        self.window = window
+    init(dependencyProvider: TitleSearchFlowCoordinatorDependencyProvider) {
         self.dependencyProvider = dependencyProvider
     }
     
     func start() {
         let searchNavigationController = dependencyProvider.titleSearchNavigationController(navigator: self)
-        window.rootViewController = searchNavigationController
-        self.searchNavigationController = searchNavigationController
+        self.navigationController = searchNavigationController
     }
 }
 
-extension TitleSearchFlowCoordinator: TitleSearchNavigator {
+extension TitleSearchFlowCoordinator: TitleNavigator {
     
     func showDetails(forTitle Id: Int) {
         let controller = self.dependencyProvider.titleDetailController(Id)
-        searchNavigationController?.pushViewController(controller, animated: true)
+        navigationController?.pushViewController(controller, animated: true)
     }
 }

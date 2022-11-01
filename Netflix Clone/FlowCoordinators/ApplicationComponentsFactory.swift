@@ -17,11 +17,40 @@ final class ApplicationComponentsFactory {
 }
 
 extension ApplicationComponentsFactory: ApplicationFlowCoordinatorDependencyProvider {
-    func titleSearchNavigationController(navigator: TitleSearchNavigator) -> UINavigationController {
+    func mainTabBarController(controllers: [UINavigationController]) -> UITabBarController {
+        let tabBarController = MainTabBarController(controllers: controllers)
+        return tabBarController
+    }
+    
+    func titleDownloadNavigationController(navigator: TitleNavigator) -> UINavigationController {
+        let viewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.tabBarItem.image = UIImage(systemName: "arrow.down.to.line")
+        return navigationController
+    }
+    
+    func comingSoonNavigationController(navigator: TitleNavigator) -> UINavigationController {
+        let useCase = ComingSoonUseCase(networkService: self.networkService)
+        let viewModel = ComingSoonViewModel(useCase: useCase, navigator: navigator)
+        let viewController = ComingSoonViewController(viewModel: viewModel)
+        let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.tabBarItem.image = UIImage(systemName: "play.circle")
+        return navigationController
+    }
+    
+    func homeNavigationController(navigator: TitleNavigator) -> UINavigationController {
+        let viewController = UIViewController()
+        let navigationController = UINavigationController(rootViewController: viewController)
+        navigationController.tabBarItem.image = UIImage(systemName: "house")
+        return navigationController
+    }
+    
+    func titleSearchNavigationController(navigator: TitleNavigator) -> UINavigationController {
         let useCase = SearchTitleUseCase(networkService: self.networkService)
         let viewModel  = SearchViewModel(useCase: useCase, navigator: navigator)
         let titleSearchViewController = SearchViewController(viewModel: viewModel)
         let titleSearchNavigationController = UINavigationController(rootViewController: titleSearchViewController)
+        titleSearchViewController.tabBarItem.image = UIImage(systemName: "magnifyingglass")
         return titleSearchNavigationController
     }
     

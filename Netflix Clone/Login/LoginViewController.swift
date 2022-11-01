@@ -178,8 +178,8 @@ class LoginViewController: UIViewController {
                                     }
                                 } receiveValue: { user in
                                     AuthorizationServiceProvider.shared.user = user
-                                    let mainTabBarController = MainTabBarController()
-                                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootViewController(mainTabBarController)
+//                                    let mainTabBarController = MainTabBarController()
+//                                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootViewController(mainTabBarController)
                                     self.stopLoadingAnimation()
                                 }
                                 .store(in: &self.cancellables)

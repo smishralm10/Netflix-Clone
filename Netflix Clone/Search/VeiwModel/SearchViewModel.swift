@@ -10,11 +10,11 @@ import Combine
 import UIKit
 
 final class SearchViewModel: TitleSearchViewModelType {
-    private weak var navigator: TitleSearchNavigator?
+    private weak var navigator: TitleNavigator?
     private let useCase: SearchTitleUseCaseType
     private var cancellables: [AnyCancellable] = []
     
-    init(useCase: SearchTitleUseCaseType, navigator: TitleSearchNavigator) {
+    init(useCase: SearchTitleUseCaseType, navigator: TitleNavigator) {
         self.useCase = useCase
         self.navigator = navigator
     }

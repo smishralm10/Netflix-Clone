@@ -14,7 +14,7 @@ struct Titles: Decodable {
 struct Title: Decodable {
     let id: Int
     let title: String
-    let posterPath: String
+    let posterPath: String?
     let overview: String
     let genreIds: [GenreId]?
     let genres: [Genre]?

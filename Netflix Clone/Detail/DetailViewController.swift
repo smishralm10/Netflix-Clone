@@ -97,8 +97,10 @@ class DetailViewController: UIViewController {
     }
     
     private func show(_ titleDetails: Title) {
-        let url = ImageSize.original.url.appendingPathComponent(titleDetails.posterPath)
-        posterImageView.sd_setImage(with: url)
+        if let posterPath = titleDetails.posterPath {
+            let url = ImageSize.original.url.appendingPathComponent(posterPath)
+            posterImageView.sd_setImage(with: url)
+        }
         titleLabel.text = titleDetails.title
     }
     

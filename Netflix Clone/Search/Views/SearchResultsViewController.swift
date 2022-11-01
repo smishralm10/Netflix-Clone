@@ -62,7 +62,10 @@ extension SearchResultsViewController: UICollectionViewDelegate, UICollectionVie
             return UICollectionViewCell()
         }
         
-        cell.configure(model: searchResultsTitles[indexPath.row].posterPath)
+        if let posterPath = searchResultsTitles[indexPath.row].posterPath {
+            cell.configure(model: posterPath)
+        }
+        
         return cell
     }
     
