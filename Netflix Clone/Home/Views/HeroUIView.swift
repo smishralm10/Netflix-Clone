@@ -8,10 +8,10 @@
 import UIKit
 import Combine
 
-class HeroUIView: UIView {
-    private var viewModel: HomeViewModel
-    var cancellables = Set<AnyCancellable>()
-    var title: Title?
+class HeroUIView: UICollectionReusableView {
+    static let reuseIdentifier = "hero-reuse-identifier"
+    var addButtonHandler: ((_ sender: UIButton) -> Void)?
+    var infoButtonHandler: (() -> Void)?
     
     private let heroImageView: UIImageView = {
         let imageView = UIImageView()
@@ -67,7 +67,7 @@ class HeroUIView: UIView {
         return button
     }()
     
-    private let infoButton: UIButton = {
+    private lazy var infoButton: UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton()
         let image = UIImage(systemName: "info.circle")?.withRenderingMode(.alwaysTemplate)
@@ -75,38 +75,18 @@ class HeroUIView: UIView {
         config.imagePadding = 10
         button.configuration = config
         button.tintColor = .white
+        button.addTarget(self, action: #selector(self.didTapInfoButton), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
-    init(frame: CGRect, viewModel: HomeViewModel) {
-        self.viewModel = viewModel
+    override init(frame: CGRect) {
         super.init(frame: frame)
         
         addSubview(heroImageView)
         addGradient()
         addSubview(buttonsStack)
         applyStackViewConstraints()
-        
-        viewModel.getWatchList()
-        viewModel.getPopularMovies()
-        viewModel.$watchList
-            .sink { [weak self] titles in
-                for title in titles {
-                    if title.id == self?.title?.id {
-                        self?.addButton.isSelected = true
-                    }
-                }
-            }
-            .store(in: &cancellables)
-        
-        viewModel.$popularMovies
-            .sink { [weak self] titles in
-                if titles.count > 0 {
-//                    self?.setImage(path: titles[0].posterPath)
-                    self?.title = titles[0]
-                }
-            }.store(in: &cancellables)
     }
     
     func addGradient(){
@@ -122,7 +102,7 @@ class HeroUIView: UIView {
     private func applyStackViewConstraints() {
         NSLayoutConstraint.activate([
             buttonsStack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            buttonsStack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -30),
+            buttonsStack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -50),
         ])
     }
     
@@ -142,33 +122,17 @@ class HeroUIView: UIView {
     
     
     @objc func addTitleToWatchList(_ sender: UIButton) {
-        guard let title = title else {
+        guard let handler = self.addButtonHandler else {
             return
         }
         
-        if sender.isSelected {
-            viewModel.addToWatchList(media_Id: title.id, type: .movie, add: false)
-                .sink { completion in
-                    if case let .failure(error) = completion {
-                        print(error.localizedDescription)
-                    }
-                } receiveValue: { [weak self] response in
-                    sender.isSelected.toggle()
-                    self?.viewModel.addOrRemoveTitle(title: title, add: false)
-                }
-                .store(in: &cancellables)
-            
-        } else {
-            viewModel.addToWatchList(media_Id: title.id, type: .movie, add: true)
-                .sink { completion in
-                    if case let .failure(error) = completion {
-                        print(error.localizedDescription)
-                    }
-                } receiveValue: { [weak self] response in
-                    sender.isSelected.toggle()
-                    self?.viewModel.addOrRemoveTitle(title: title, add: true)
-                }
-                .store(in: &cancellables)
+        handler(sender)
+    }
+    
+    @objc func didTapInfoButton(_ sender: UIButton) {
+        guard let handler = infoButtonHandler else {
+            return
         }
+        handler()
     }
 }

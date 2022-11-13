@@ -12,6 +12,10 @@
 		E10D7A6128CB1F7900225A4E /* model.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10D7A6028CB1F7900225A4E /* model.swift */; };
 		E10D7A6328CB304300225A4E /* DetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10D7A6228CB304300225A4E /* DetailViewModel.swift */; };
 		E10D7A6528CB4F3A00225A4E /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E10D7A6428CB4F3A00225A4E /* DetailViewController.swift */; };
+		E11586E5291E222F0044ED20 /* TitleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11586E4291E222F0044ED20 /* TitleViewModel.swift */; };
+		E11586E7291E85410044ED20 /* TitleSupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11586E6291E85410044ED20 /* TitleSupplementaryView.swift */; };
+		E11656CE29125F6C004C02E4 /* HomeViewModelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11656CD29125F6C004C02E4 /* HomeViewModelType.swift */; };
+		E11656D02912839D004C02E4 /* HomeUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = E11656CF2912839D004C02E4 /* HomeUseCase.swift */; };
 		E116AB5A28BF26EC0018CF7E /* Resource.swift in Sources */ = {isa = PBXBuildFile; fileRef = E116AB5928BF26EC0018CF7E /* Resource.swift */; };
 		E1233D9928C4F38A00C62C71 /* ComingSoonViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1233D9828C4F38900C62C71 /* ComingSoonViewController.swift */; };
 		E1233D9B28C4F4F300C62C71 /* ComingSoonTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1233D9A28C4F4F300C62C71 /* ComingSoonTableViewCell.swift */; };
@@ -40,7 +44,6 @@
 		E1694C852903D6B2006DCB48 /* FlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1694C842903D6B2006DCB48 /* FlowCoordinator.swift */; };
 		E1694C872903DE75006DCB48 /* ApplicationFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1694C862903DE75006DCB48 /* ApplicationFlowCoordinator.swift */; };
 		E1694C892903DF2E006DCB48 /* TitleSearchFlowCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1694C882903DF2E006DCB48 /* TitleSearchFlowCoordinator.swift */; };
-		E177523A28A8B31700D4F4AF /* CollectionViewTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E177523928A8B31700D4F4AF /* CollectionViewTableViewCell.swift */; };
 		E177523C28A8CC0700D4F4AF /* HeroUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E177523B28A8CC0700D4F4AF /* HeroUIView.swift */; };
 		E187EFCA28E193BA0024CBBD /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E187EFC928E193BA0024CBBD /* LoginViewController.swift */; };
 		E1C236FC2893D73A0039F870 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C236FB2893D73A0039F870 /* AppDelegate.swift */; };
@@ -85,6 +88,10 @@
 		E10D7A6028CB1F7900225A4E /* model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = model.swift; sourceTree = "<group>"; };
 		E10D7A6228CB304300225A4E /* DetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewModel.swift; sourceTree = "<group>"; };
 		E10D7A6428CB4F3A00225A4E /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		E11586E4291E222F0044ED20 /* TitleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleViewModel.swift; sourceTree = "<group>"; };
+		E11586E6291E85410044ED20 /* TitleSupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleSupplementaryView.swift; sourceTree = "<group>"; };
+		E11656CD29125F6C004C02E4 /* HomeViewModelType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModelType.swift; sourceTree = "<group>"; };
+		E11656CF2912839D004C02E4 /* HomeUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeUseCase.swift; sourceTree = "<group>"; };
 		E116AB5928BF26EC0018CF7E /* Resource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Resource.swift; sourceTree = "<group>"; };
 		E1233D9828C4F38900C62C71 /* ComingSoonViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComingSoonViewController.swift; sourceTree = "<group>"; };
 		E1233D9A28C4F4F300C62C71 /* ComingSoonTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComingSoonTableViewCell.swift; sourceTree = "<group>"; };
@@ -111,7 +118,6 @@
 		E1694C842903D6B2006DCB48 /* FlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowCoordinator.swift; sourceTree = "<group>"; };
 		E1694C862903DE75006DCB48 /* ApplicationFlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationFlowCoordinator.swift; sourceTree = "<group>"; };
 		E1694C882903DF2E006DCB48 /* TitleSearchFlowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleSearchFlowCoordinator.swift; sourceTree = "<group>"; };
-		E177523928A8B31700D4F4AF /* CollectionViewTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewTableViewCell.swift; sourceTree = "<group>"; };
 		E177523B28A8CC0700D4F4AF /* HeroUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroUIView.swift; sourceTree = "<group>"; };
 		E187EFC928E193BA0024CBBD /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		E1C236F82893D73A0039F870 /* Netflix Clone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Netflix Clone.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -332,9 +338,9 @@
 			isa = PBXGroup;
 			children = (
 				E1F888162895136000F2EF2B /* HomeViewController.swift */,
-				E177523928A8B31700D4F4AF /* CollectionViewTableViewCell.swift */,
 				E125C70F28B7BDAE002B70B0 /* TitleCollectionViewCell.swift */,
 				E177523B28A8CC0700D4F4AF /* HeroUIView.swift */,
+				E11586E6291E85410044ED20 /* TitleSupplementaryView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -343,6 +349,8 @@
 			isa = PBXGroup;
 			children = (
 				E1276EF028B64E8E00301B55 /* HomeViewModel.swift */,
+				E11656CD29125F6C004C02E4 /* HomeViewModelType.swift */,
+				E11586E4291E222F0044ED20 /* TitleViewModel.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -413,6 +421,7 @@
 			children = (
 				E1FC00D028FFC9A000A469B0 /* SearchTitleUseCase.swift */,
 				E1341EBD29112958008712B2 /* ComingSoonUseCase.swift */,
+				E11656CF2912839D004C02E4 /* HomeUseCase.swift */,
 			);
 			path = UseCases;
 			sourceTree = "<group>";
@@ -558,6 +567,7 @@
 				E1F888172895136000F2EF2B /* HomeViewController.swift in Sources */,
 				E1341EBE29112958008712B2 /* ComingSoonUseCase.swift in Sources */,
 				E116AB5A28BF26EC0018CF7E /* Resource.swift in Sources */,
+				E11586E5291E222F0044ED20 /* TitleViewModel.swift in Sources */,
 				E1F8881B289513A600F2EF2B /* SearchViewController.swift in Sources */,
 				E1EB5E8828C8C7210084482D /* SearchResultsViewController.swift in Sources */,
 				E12DC3FE28B88E1000A14EF7 /* ImageLoader.swift in Sources */,
@@ -570,12 +580,13 @@
 				E1F8881D289513BA00F2EF2B /* DownloadsViewController.swift in Sources */,
 				E10D7A6528CB4F3A00225A4E /* DetailViewController.swift in Sources */,
 				E10D7A6328CB304300225A4E /* DetailViewModel.swift in Sources */,
+				E11586E7291E85410044ED20 /* TitleSupplementaryView.swift in Sources */,
 				E1C237062893D73A0039F870 /* Netflix_Clone.xcdatamodeld in Sources */,
 				E1341EBA2910F6CD008712B2 /* DownloadFlowCoordinator.swift in Sources */,
 				E1C237002893D73A0039F870 /* MainTabBarController.swift in Sources */,
 				E1694C832903D214006DCB48 /* FlowCoordinatorDependencyProviders.swift in Sources */,
 				E1341EB82910F29D008712B2 /* ComingSoonFlowCoordinator.swift in Sources */,
-				E177523A28A8B31700D4F4AF /* CollectionViewTableViewCell.swift in Sources */,
+				E11656CE29125F6C004C02E4 /* HomeViewModelType.swift in Sources */,
 				E125C71028B7BDAE002B70B0 /* TitleCollectionViewCell.swift in Sources */,
 				E1F1059328C22026004BEE7E /* Extension.swift in Sources */,
 				E1FC00D128FFC9A000A469B0 /* SearchTitleUseCase.swift in Sources */,
@@ -583,6 +594,7 @@
 				E177523C28A8CC0700D4F4AF /* HeroUIView.swift in Sources */,
 				E10D7A6128CB1F7900225A4E /* model.swift in Sources */,
 				E1276EF128B64E8E00301B55 /* HomeViewModel.swift in Sources */,
+				E11656D02912839D004C02E4 /* HomeUseCase.swift in Sources */,
 				E132874928E32C2E008BBFD4 /* Model.swift in Sources */,
 				E13D47DF290AC87B001118A5 /* Genre.swift in Sources */,
 				E1694C802903D003006DCB48 /* ApplicationComponentsFactory.swift in Sources */,

@@ -39,7 +39,9 @@ extension ApplicationComponentsFactory: ApplicationFlowCoordinatorDependencyProv
     }
     
     func homeNavigationController(navigator: TitleNavigator) -> UINavigationController {
-        let viewController = UIViewController()
+        let useCase = HomeUseCase(networkService: self.networkService)
+        let viewModel = HomeViewModel(navigator: navigator, useCase: useCase)
+        let viewController = HomeViewController(viewModel: viewModel)
         let navigationController = UINavigationController(rootViewController: viewController)
         navigationController.tabBarItem.image = UIImage(systemName: "house")
         return navigationController

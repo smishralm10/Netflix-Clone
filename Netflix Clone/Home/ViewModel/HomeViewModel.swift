@@ -8,92 +8,96 @@
 import Foundation
 import Combine
 
-class HomeViewModel {
-    private var cancellables = Set<AnyCancellable>()
-    @Published var trendingMovies = [Title]()
-    @Published var popularMovies = [Title]()
-    @Published var topRatedMovies = [Title]()
-    @Published var watchList = [Title]()
+class HomeViewModel: HomeViewModelType {
+    private var cancellables = [AnyCancellable]()
+    private weak var navigator: TitleNavigator?
+    private let useCase: HomeUseCaseType
     
-    func getTrendingMovies() {
-        NetworkService.shared
-            .load(Resource<[Title]>.trending(type: .movie))
-            .receive(on: RunLoop.main)
-            .sink { completion in
-                if case let .failure(error) = completion {
-                    print(error.localizedDescription)
-                }
-            } receiveValue: { [weak self] titles in
-                self?.trendingMovies = titles.results
-            }
-            .store(in: &cancellables)
+    
+    init(navigator: TitleNavigator, useCase: HomeUseCaseType) {
+        self.navigator = navigator
+        self.useCase = useCase
     }
     
-    func getPopularMovies() {
-        NetworkService.shared
-            .load(Resource<[Title]>.popular(type: .movie))
-            .receive(on: RunLoop.main)
-            .sink { completion in
-                if case let .failure(error) = completion {
-                    print(error.localizedDescription)
-                }
-            } receiveValue: { [weak self] titles in
-                self?.popularMovies = titles.results
+    func transform(input: HomeViewModelInput) -> HomeViewModelOutput {
+        cancellables.forEach{ $0.cancel() }
+        cancellables.removeAll()
+        
+        input.selection
+            .sink { [weak self] titleId in
+                self?.navigator?.showDetails(forTitle: titleId)
             }
             .store(in: &cancellables)
-    }
-    
-    func getTopRatedMovies() {
-        NetworkService.shared
-            .load(Resource<[Title]>.topRated(type: .movie))
-            .receive(on: RunLoop.main)
-            .sink { completion in
-                if case let .failure(error) = completion {
-                    print(error.localizedDescription)
+        
+//        input.addToList
+//            .sink { [weak self] (id, shouldAdd) in
+//                self?.useCase.addToList(id: id, shouldAdd: shouldAdd)
+//            }.store(in: &cancellables)
+        
+        let trendingTitles = input.appear
+            .flatMapLatest { [unowned self] _ in self.useCase.trendingTitles() }
+            .map({ result -> [Title] in
+                if case let .success(titles) = result {
+                    return titles.results
+                } else {
+                    return []
                 }
-            } receiveValue: { [weak self] titles in
-                self?.topRatedMovies = titles.results
-            }
-            .store(in: &cancellables)
-    }
-    
-    func getWatchList() {
-        NetworkService.shared
-            .load(Resource<[Title]>.getWatchList())
-            .receive(on: RunLoop.main)
-            .map({ titles in
-                titles.results
-            })
-            .sink { completion in
-                if case let .failure(error) =  completion {
-                    print(error.localizedDescription)
-                }
-            } receiveValue: { [weak self] titles in
-                self?.watchList = titles
-            }
-            .store(in: &cancellables)
-    }
-    
-    func addToWatchList(media_Id: Int, type: TitleType, add: Bool) -> AnyPublisher<WatchListResponse, Error> {
-         return NetworkService.shared
-            .load(Resource<WatchListResponse>.addTitleToWatchList(media_Id: media_Id, type: type, add: add))
-            .receive(on: RunLoop.main)
-            .map({ response in
-                response
             })
             .eraseToAnyPublisher()
-    }
-    
-    func addOrRemoveTitle(title: Title, add: Bool) {
-        for (i, t) in self.watchList.enumerated() {
-            
-            if t.id == title.id {
-                if add {
-                    watchList.append(title)
+        
+        let topRatedTitles = input.appear
+            .flatMapLatest { [unowned self] _ in self.useCase.topRatedTitles() }
+            .map { result -> [Title] in
+                if case let .success(titles) = result {
+                    return titles.results
                 } else {
-                    watchList.remove(at: i)
+                    return []
                 }
             }
+            .eraseToAnyPublisher()
+
+        let popularTitles = input.appear
+            .flatMapLatest { [unowned self] _ in self.useCase.popularTitles() }
+            .map { result -> [Title] in
+                if case let .success(titles) = result {
+                    return titles.results
+                } else {
+                    return []
+                }
+            }
+            .eraseToAnyPublisher()
+        
+        let watchlistTitles = input.appear
+            .flatMapLatest { [unowned self] _ in self.useCase.watchlistTitles()}
+            .map { result -> [Title] in
+                if case let .success(titles) = result {
+                    return titles.results
+                } else {
+                    return []
+                }
+            }
+            .eraseToAnyPublisher()
+        
+        let homeFeedTitles = Publishers.CombineLatest4(trendingTitles, topRatedTitles, popularTitles, watchlistTitles)
+            .map { (title1, title2, title3, title4) -> HomeTitleState in
+                return .success(self.convert(with: [title1, title2, title3, title4]))
+            }
+            .eraseToAnyPublisher()
+        
+        let loading: HomeViewModelOutput = input.appear.map { _ in .loading }.eraseToAnyPublisher()
+        
+        return Publishers.Merge(loading, homeFeedTitles).eraseToAnyPublisher()
+    }
+}
+
+extension HomeViewModel {
+    private func convert(with titles: [[Title]]) -> [TitleCollection] {
+        var i = 0
+        let headers = ["Trending", "Top Rated", "Popular", "My List"]
+        return titles.map { titles in
+            let collection = TitleCollection(header: headers[i], titles: titles)
+            i += 1
+            return collection
         }
     }
 }
