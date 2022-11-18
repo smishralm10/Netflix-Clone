@@ -62,4 +62,11 @@ extension ApplicationComponentsFactory: ApplicationFlowCoordinatorDependencyProv
         let viewController = DetailViewController(viewModel: viewModel)
         return viewController
     }
+    
+    func loginViewController() -> UIViewController {
+        let useCase = LoginUseCase(networkService: self.networkService)
+        let viewModel = LoginViewModel(useCase: useCase)
+        let viewController = LoginViewController(viewModel: viewModel)
+        return viewController
+    }
 }

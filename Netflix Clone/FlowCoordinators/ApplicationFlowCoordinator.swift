@@ -39,7 +39,17 @@ class ApplicationFlowCoordinator: FlowCoordinator {
             downloadFlowCoordinator.navigationController!
         ]
         
-        let mainController = dependencyProvider.mainTabBarController(controllers: controllers)
-        window.rootViewController = mainController
+        AuthorizationServiceProvider.shared.getCredentialState { [weak self] authState, error in
+            guard let self = self else {
+                return
+            }
+            switch authState {
+            case .authorized:
+                let mainController = self.dependencyProvider.mainTabBarController(controllers: controllers)
+                self.window.rootViewController = mainController
+            case .unauthorized:
+                self.window.rootViewController = self.dependencyProvider.loginViewController()
+            }
+        }
     }
 }

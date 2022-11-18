@@ -55,6 +55,8 @@
 		E1C237162893D73E0039F870 /* Netflix_CloneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C237152893D73E0039F870 /* Netflix_CloneTests.swift */; };
 		E1C237202893D73E0039F870 /* Netflix_CloneUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C2371F2893D73E0039F870 /* Netflix_CloneUITests.swift */; };
 		E1C237222893D73E0039F870 /* Netflix_CloneUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1C237212893D73E0039F870 /* Netflix_CloneUITestsLaunchTests.swift */; };
+		E1E3E7FE2921174F001D151E /* LoginUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E3E7FD2921174F001D151E /* LoginUseCase.swift */; };
+		E1E502E529225D5600FE2F23 /* LoginViewModelType.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E502E429225D5600FE2F23 /* LoginViewModelType.swift */; };
 		E1EB5E8828C8C7210084482D /* SearchResultsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EB5E8728C8C7200084482D /* SearchResultsViewController.swift */; };
 		E1EB5E8A28C8C8830084482D /* TitleTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EB5E8928C8C8830084482D /* TitleTableViewCell.swift */; };
 		E1EB5E8C28C8E1D30084482D /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1EB5E8B28C8E1D30084482D /* SearchViewModel.swift */; };
@@ -133,6 +135,8 @@
 		E1C2371B2893D73E0039F870 /* Netflix CloneUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Netflix CloneUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E1C2371F2893D73E0039F870 /* Netflix_CloneUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Netflix_CloneUITests.swift; sourceTree = "<group>"; };
 		E1C237212893D73E0039F870 /* Netflix_CloneUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Netflix_CloneUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		E1E3E7FD2921174F001D151E /* LoginUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginUseCase.swift; sourceTree = "<group>"; };
+		E1E502E429225D5600FE2F23 /* LoginViewModelType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModelType.swift; sourceTree = "<group>"; };
 		E1EB5E8728C8C7200084482D /* SearchResultsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchResultsViewController.swift; sourceTree = "<group>"; };
 		E1EB5E8928C8C8830084482D /* TitleTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleTableViewCell.swift; sourceTree = "<group>"; };
 		E1EB5E8B28C8E1D30084482D /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
@@ -204,6 +208,7 @@
 			isa = PBXGroup;
 			children = (
 				E13FBA0728AE17DF00EF5743 /* APIService.swift */,
+				E132874328E2C8B3008BBFD4 /* LoginViewModel.swift */,
 				E116AB5928BF26EC0018CF7E /* Resource.swift */,
 				E129991728FEB878005B7B54 /* NetworkServiceType.swift */,
 			);
@@ -228,9 +233,9 @@
 		E187EFC828E193900024CBBD /* Login */ = {
 			isa = PBXGroup;
 			children = (
+				E1E502E329225D2E00FE2F23 /* ViewModel */,
 				E132874828E32C2E008BBFD4 /* Model.swift */,
 				E187EFC928E193BA0024CBBD /* LoginViewController.swift */,
-				E132874328E2C8B3008BBFD4 /* LoginViewModel.swift */,
 			);
 			path = Login;
 			sourceTree = "<group>";
@@ -295,6 +300,14 @@
 				E1C237212893D73E0039F870 /* Netflix_CloneUITestsLaunchTests.swift */,
 			);
 			path = "Netflix CloneUITests";
+			sourceTree = "<group>";
+		};
+		E1E502E329225D2E00FE2F23 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				E1E502E429225D5600FE2F23 /* LoginViewModelType.swift */,
+			);
+			path = ViewModel;
 			sourceTree = "<group>";
 		};
 		E1F888082895122300F2EF2B /* Home */ = {
@@ -422,6 +435,7 @@
 				E1FC00D028FFC9A000A469B0 /* SearchTitleUseCase.swift */,
 				E1341EBD29112958008712B2 /* ComingSoonUseCase.swift */,
 				E11656CF2912839D004C02E4 /* HomeUseCase.swift */,
+				E1E3E7FD2921174F001D151E /* LoginUseCase.swift */,
 			);
 			path = UseCases;
 			sourceTree = "<group>";
@@ -592,7 +606,9 @@
 				E1FC00D128FFC9A000A469B0 /* SearchTitleUseCase.swift in Sources */,
 				E129991828FEB878005B7B54 /* NetworkServiceType.swift in Sources */,
 				E177523C28A8CC0700D4F4AF /* HeroUIView.swift in Sources */,
+				E1E3E7FE2921174F001D151E /* LoginUseCase.swift in Sources */,
 				E10D7A6128CB1F7900225A4E /* model.swift in Sources */,
+				E1E502E529225D5600FE2F23 /* LoginViewModelType.swift in Sources */,
 				E1276EF128B64E8E00301B55 /* HomeViewModel.swift in Sources */,
 				E11656D02912839D004C02E4 /* HomeUseCase.swift in Sources */,
 				E132874928E32C2E008BBFD4 /* Model.swift in Sources */,

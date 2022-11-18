@@ -13,7 +13,7 @@ final class AuthorizationServiceProvider {
     static let shared = AuthorizationServiceProvider()
     private var authorizationState: AuthorizationState = .unauthorized
     private var error: String?
-    var user: User?
+    var accountId: Int?
     var sessionId: String?
     
     private let dateFormatter: DateFormatter = {
@@ -23,37 +23,48 @@ final class AuthorizationServiceProvider {
     }()
     
     func getCredentialState(handler: @escaping (_ authState: AuthorizationState, _ error: String?) -> Void) {
-        let user = UserDefaults.standard.value(forKey: "currentUser") as? [String : String]
+        let user = UserDefaults.standard.value(forKey: "currentUser") as? [String : Any]
         
         guard let user = user else {
             handler(.unauthorized, "User not available")
             return
         }
         
-        let tokenExpireDateString = user["expiresAt"]!
-        let tokenExpireDate = dateFormatter.date(from: tokenExpireDateString)!
+        let tokenExpireDateString = user["expiresAt"]! as? String
+        let tokenExpireDate = dateFormatter.date(from: tokenExpireDateString!)!
         
         guard Date() < tokenExpireDate else {
             handler(.unauthorized, "Request token expired")
             return
         }
         
-        sessionId = user["sessionId"]!
-       
-        if self.user == nil {
-            LoginViewModel().getUserAccount()
-                .sink { completion in
-                    if case let .failure(error) = completion {
-                        LoginViewController().showAlert(title: "Account Error", message: error.localizedDescription)
-                    }
-                } receiveValue: { [weak self] user in
-                    self?.user = user
-                    self?.authorizationState = .authorized
-                    handler(.authorized, nil)
-                }
-                .store(in: &cancellables)
-        }
+        sessionId = user["sessionId"]! as? String
+        accountId = user["accountId"]! as? Int
+        handler(.authorized, nil)
     }
+    
+    func setLoggedInUser(with credentails: UserCredentails, expiresAt date: String) {
+        sessionId = credentails.sessionID
+        accountId = credentails.accountID
+        
+        let userData: [String: Any] = [
+            "sessionId": credentails.sessionID,
+            "accountId": credentails.accountID,
+            "username": credentails.username,
+            "requestToken": credentails.requestToken,
+            "expiresAt": date
+        ]
+        
+        UserDefaults.standard.set(userData, forKey: "currentUser")
+        authorizationState = .authorized
+    }
+}
+
+struct UserCredentails {
+    let sessionID: String
+    let accountID: Int
+    let username: String
+    let requestToken: String
 }
 
 enum AuthorizationState {

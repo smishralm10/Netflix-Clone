@@ -29,4 +29,7 @@ protocol TitleSearchFlowCoordinatorDependencyProvider: AnyObject {
     
     // Creates UIViewController to show details for title
     func titleDetailController(_ id: Int) -> UIViewController
+    
+    // Cretes view controller for user login
+    func loginViewController() -> UIViewController
 }

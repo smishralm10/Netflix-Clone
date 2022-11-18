@@ -10,9 +10,19 @@ import Combine
 
 class LoginViewController: UIViewController {
     
-    private let viewModel = LoginViewModel()
-    @Published var requestToken = ""
-    var cancellables = Set<AnyCancellable>()
+    private var cancellables = [AnyCancellable]()
+    private let viewModel: LoginViewModelType
+    private let appear = PassthroughSubject<Void, Never>()
+    private let login = PassthroughSubject<(String, String), Never>()
+    
+    init(viewModel: LoginViewModelType) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("Not supported")
+    }
     
     private lazy var netflixLogo: UIImageView = {
         let imageView = UIImageView()
@@ -39,6 +49,7 @@ class LoginViewController: UIViewController {
         )
         textField.textContentType = .emailAddress
         textField.borderStyle = .roundedRect
+        textField.autocapitalizationType = .none
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
     }()
@@ -57,9 +68,18 @@ class LoginViewController: UIViewController {
         return textField
     }()
     
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.systemFont(ofSize: 16)
+        label.textColor = .red
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
     private lazy var signInButton: UIButton = {
         let button = UIButton()
         button.setTitle("Sign In", for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         button.tintColor = .white
         button.backgroundColor = .red
         button.layer.cornerRadius = 5
@@ -79,29 +99,58 @@ class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(netflixLogo)
+        view.addSubview(errorLabel)
         view.addSubview(signInLabel)
         view.addSubview(usernameTextField)
         view.addSubview(passwordTextField)
         view.addSubview(signInButton)
         
-        fetchToken()
         applyConstraints()
-    }
-
-    private func fetchToken() {
-        viewModel.getRequestToken()
-            .sink { completion in
-                if case let .failure(error) = completion {
-                    print(error.localizedDescription)
-                }
-            } receiveValue: { [weak self] response in
-                if let token = response.requestToken {
-                    self?.requestToken = token
-                }
-            }
-            .store(in: &cancellables)
+        bind(to: viewModel)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        appear.send(())
+    }
+    
+    private func bind(to: LoginViewModelType) {
+        let input = LoginViewModelInput(appear: self.appear.eraseToAnyPublisher(), login: self.login.eraseToAnyPublisher())
+        
+        let output = viewModel.transform(input: input)
+        
+        output.sink { [weak self] state in
+            self?.updateUI(with: state)
+        }
+        .store(in: &cancellables)
+    }
+    
+    private func updateUI(with state: LoginState) {
+        switch state {
+        case .idle:
+            errorLabel.isHidden = true
+        case .loading:
+            startLoadingAnimation()
+        case .invalidUsername(let errorMessage):
+            errorLabel.isHidden = false
+            errorLabel.text = errorMessage
+            usernameTextField.layer.borderColor = UIColor.red.cgColor
+        case .invalidPassword(let errorMessage):
+            errorLabel.isHidden = false
+            errorLabel.text = errorMessage
+            passwordTextField.layer.borderColor = UIColor.red.cgColor
+        case .success:
+            let delegate = self.view.window?.windowScene?.delegate as? SceneDelegate
+            delegate?.appCoordinator.start()
+            stopLoadingAnimation()
+        case .failure(let error):
+            errorLabel.isHidden = false
+            errorLabel.text = "Invalid Username or Password"
+            stopLoadingAnimation()
+            print(error)
+        }
+    }
+
     private func startLoadingAnimation() {
         signInButton.setTitle(nil, for: .normal)
         signInButton.addSubview(activityIndicator)
@@ -125,69 +174,18 @@ class LoginViewController: UIViewController {
     
     @objc func handleSignIn(_ sender: UIButton) {
         guard let username = usernameTextField.text,
-                isValidUsername(String(username)) else {
-            showAlert(title: "Invalid Username", message: "Please enter a valid username")
+        isValidUsername(username) else {
+            updateUI(with: .invalidUsername("Username Should be at least 3 characters"))
             return
         }
         
         guard let password = passwordTextField.text,
-              isValidPassword(String(password)) else {
-            showAlert(title: "Invalid Password", message: "Password should contain atleast 6 characters")
+              isValidPassword(password) else {
+            updateUI(with: .invalidPassword("Password"))
             return
         }
         
-        guard !self.requestToken.isEmpty else {
-            showAlert(title: "Oops", message: "Something went wrong")
-            return
-        }
-            
-        startLoadingAnimation()
-        viewModel.validateToken(username: username, password: password, requestToken: requestToken)
-            .sink { [weak self] completion in
-                if case let .failure(error) = completion {
-                    self?.showAlert(title: "Authentication Failed", message: error.localizedDescription)
-                }
-            } receiveValue: { [weak self] response in
-                guard response.success,
-                      let self = self,
-                      let expiresAt = response.expiresAt,
-                      let token = response.requestToken else {
-                    return
-                }
-                self.requestToken = token
-                
-                self.viewModel.createSession(requestToken: token)
-                    .sink { completion in
-                        if case let .failure(error) = completion {
-                            print(error.localizedDescription)
-                        }
-                    } receiveValue: { response in
-                        if let sessionId = response.sessionId {
-                            AuthorizationServiceProvider.shared.sessionId = sessionId
-                            let userData = [
-                                "username": username,
-                                "expiresAt": expiresAt,
-                                "requestToken": token,
-                                "sessionId": sessionId
-                            ]
-                            UserDefaults.standard.set(userData, forKey: "currentUser")
-                            LoginViewModel().getUserAccount()
-                                .sink { completion in
-                                    if case let .failure(error) = completion {
-                                        self.showAlert(title: "No Account", message: error.localizedDescription)
-                                    }
-                                } receiveValue: { user in
-                                    AuthorizationServiceProvider.shared.user = user
-//                                    let mainTabBarController = MainTabBarController()
-//                                    (UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate)?.changeRootViewController(mainTabBarController)
-                                    self.stopLoadingAnimation()
-                                }
-                                .store(in: &self.cancellables)
-                        }
-                    }
-                    .store(in: &self.cancellables)
-            }
-            .store(in: &cancellables)
+        login.send((username, password))
     }
     
     func isValidUsername(_ username: String) -> Bool {
@@ -198,10 +196,7 @@ class LoginViewController: UIViewController {
     }
     
     func isValidPassword(_ password: String) -> Bool {
-        if password.count < 6 {
-            return false
-        }
-        return true
+        return !password.isEmpty
     }
     
     func showAlert(title: String, message: String) {
@@ -214,6 +209,9 @@ class LoginViewController: UIViewController {
         NSLayoutConstraint.activate([
             netflixLogo.topAnchor.constraint(equalTo: view.topAnchor, constant: 100),
             netflixLogo.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            errorLabel.topAnchor.constraint(equalTo: netflixLogo.bottomAnchor, constant: 20),
+            errorLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             signInLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             signInLabel.topAnchor.constraint(equalTo: netflixLogo.bottomAnchor, constant: 80),
