@@ -104,6 +104,8 @@ class LoginViewController: UIViewController {
         view.addSubview(usernameTextField)
         view.addSubview(passwordTextField)
         view.addSubview(signInButton)
+        usernameTextField.delegate = self
+        passwordTextField.delegate = self
         
         applyConstraints()
         bind(to: viewModel)
@@ -132,22 +134,27 @@ class LoginViewController: UIViewController {
         case .loading:
             startLoadingAnimation()
         case .invalidUsername(let errorMessage):
-            errorLabel.isHidden = false
-            errorLabel.text = errorMessage
-            usernameTextField.layer.borderColor = UIColor.red.cgColor
+            displayError(for: [usernameTextField], with: errorMessage)
         case .invalidPassword(let errorMessage):
-            errorLabel.isHidden = false
-            errorLabel.text = errorMessage
-            passwordTextField.layer.borderColor = UIColor.red.cgColor
+            displayError(for: [passwordTextField], with: errorMessage)
         case .success:
             let delegate = self.view.window?.windowScene?.delegate as? SceneDelegate
             delegate?.appCoordinator.start()
             stopLoadingAnimation()
         case .failure(let error):
-            errorLabel.isHidden = false
-            errorLabel.text = "Invalid Username or Password"
+            displayError(for: [usernameTextField, passwordTextField], with: "Invalid Username or Password")
             stopLoadingAnimation()
             print(error)
+        }
+    }
+    
+    private func displayError(for textFields: [UITextField], with message: String){
+        errorLabel.isHidden = false
+        errorLabel.text = message
+        textFields.forEach { textField in
+            textField.layer.borderWidth = 2
+            textField.layer.borderColor = UIColor.red.cgColor
+            textField.layer.cornerRadius = 5
         }
     }
 
@@ -181,7 +188,7 @@ class LoginViewController: UIViewController {
         
         guard let password = passwordTextField.text,
               isValidPassword(password) else {
-            updateUI(with: .invalidPassword("Password"))
+            updateUI(with: .invalidPassword("Password should not be empty"))
             return
         }
         
@@ -231,5 +238,17 @@ class LoginViewController: UIViewController {
             signInButton.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 24),
             signInButton.heightAnchor.constraint(equalToConstant: 50),
         ])
+    }
+}
+
+extension LoginViewController: UITextFieldDelegate {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        textField.layer.borderWidth = 2
+        textField.layer.borderColor = UIColor.white.cgColor
+        textField.layer.cornerRadius = 5
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        textField.layer.borderWidth = 0
     }
 }
