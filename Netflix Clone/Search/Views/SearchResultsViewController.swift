@@ -10,7 +10,8 @@ import Combine
 
 class SearchResultsViewController: UIViewController {
     
-    @Published var searchResultsTitles = [Title]()
+    private var searchResultsTitles = [Title]()
+    private let selectListener: PassthroughSubject<Int, Never>
     
     private let searchResultsCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -21,6 +22,15 @@ class SearchResultsViewController: UIViewController {
         collectionView.register(TitleCollectionViewCell.self, forCellWithReuseIdentifier: TitleCollectionViewCell.identifier)
         return collectionView
     }()
+    
+    init(selectListener: PassthroughSubject<Int, Never>) {
+        self.selectListener = selectListener
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init(coder: NSCoder) {
+        fatalError("Not Supported")
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,7 +38,6 @@ class SearchResultsViewController: UIViewController {
         
         searchResultsCollectionView.delegate = self
         searchResultsCollectionView.dataSource = self
-        
     }
     
     override func viewDidLayoutSubviews() {
@@ -36,7 +45,7 @@ class SearchResultsViewController: UIViewController {
         searchResultsCollectionView.frame = view.bounds
     }
     
-    func populateSearchResults(titles: [Title]) {
+    public func bind(with titles: [Title]) {
         searchResultsTitles = titles
         searchResultsCollectionView.reloadData()
     }
@@ -53,7 +62,14 @@ extension SearchResultsViewController: UICollectionViewDelegate, UICollectionVie
             return UICollectionViewCell()
         }
         
-        cell.configure(model: searchResultsTitles[indexPath.row].posterPath)
+        let posterPath = searchResultsTitles[indexPath.row].posterPath
+        cell.bind(with: posterPath)
+        
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        selectListener.send(searchResultsTitles[indexPath.row].id)
+        collectionView.deselectItem(at: indexPath, animated: true)
     }
 }

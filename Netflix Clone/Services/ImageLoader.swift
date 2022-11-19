@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import UIKit.UIImage
+import Combine
 
 enum ImageSize {
     case small
@@ -19,4 +21,8 @@ enum ImageSize {
             return APIConstants.originalImageURL
         }
     }
+}
+
+protocol ImageLoaderServiceType: AnyObject {
+    func loadImage(from url: URL) -> AnyPublisher<UIImage?, Never>
 }

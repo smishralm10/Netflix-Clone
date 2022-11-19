@@ -31,8 +31,10 @@ class TitleCollectionViewCell: UICollectionViewCell {
         posterImageView.frame = contentView.bounds
     }
     
-    func configure(model: String) {
-        let url = ImageSize.small.url.appendingPathComponent(model)
-        posterImageView.sd_setImage(with: url)
+    func bind(with model: String?) {
+        if let model = model {
+            let url = ImageSize.small.url.appendingPathComponent(model)
+            posterImageView.sd_setImage(with: url)
+        }
     }
 }

@@ -156,8 +156,8 @@ extension Resource {
     }
     
     static func getWatchList() -> Resource<Titles> {
-        let user = AuthorizationServiceProvider.shared.user!
-        let url = APIConstants.baseURL.appendingPathComponent("/account/\(user.id)/watchlist/movies")
+        let accountId = AuthorizationServiceProvider.shared.accountId!
+        let url = APIConstants.baseURL.appendingPathComponent("/account/\(accountId)/watchlist/movies")
         let parameters: [String: CustomStringConvertible] = [
             "api_key": APIConstants.apiKey,
             "session_id": AuthorizationServiceProvider.shared.sessionId!
@@ -166,8 +166,8 @@ extension Resource {
     }
     
     static func addTitleToWatchList(media_Id: Int, type: TitleType, add: Bool) -> Resource<WatchListResponse> {
-        let user = AuthorizationServiceProvider.shared.user!
-        let url = APIConstants.baseURL.appendingPathComponent("/account/\(user.id)/watchlist")
+        let accountId = AuthorizationServiceProvider.shared.accountId!
+        let url = APIConstants.baseURL.appendingPathComponent("/account/\(accountId)/watchlist")
         let parameters: [String: CustomStringConvertible] = [
             "api_key": APIConstants.apiKey,
             "session_id": AuthorizationServiceProvider.shared.sessionId!
@@ -180,6 +180,15 @@ extension Resource {
         ]
         
         return Resource<WatchListResponse>(url: url, parameters: parameters, body: body)
+    }
+    
+    static func details(id: Int) -> Resource<Title> {
+        let url = APIConstants.baseURL.appendingPathComponent("/movie/\(id)")
+        let parameters: [String: CustomStringConvertible] = [
+            "api_key": APIConstants.apiKey
+        ]
+        
+        return Resource<Title>(url: url, parameters: parameters)
     }
 }
 

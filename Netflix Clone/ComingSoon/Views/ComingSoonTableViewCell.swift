@@ -149,9 +149,11 @@ class ComingSoonTableViewCell: UITableViewCell {
         return label
     }
     
-    func configureCell(with title: Title) {
-        let url = ImageSize.original.url.appendingPathComponent(title.posterPath)
-        posterImageView.sd_setImage(with: url)
+    func bind(with title: Title) {
+        if let posterPath = title.posterPath {
+            let url = ImageSize.original.url.appendingPathComponent(posterPath)
+            posterImageView.sd_setImage(with: url)
+        }
         
         if let releaseDate = convertToTitleDateString(title.releaseDate) {
             dateLabel.text = "Coming on \(releaseDate)"

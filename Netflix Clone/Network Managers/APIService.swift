@@ -8,8 +8,13 @@
 import Foundation
 import Combine
 
-final class TMDBServices {
-    static let shared = TMDBServices()
+final class NetworkService: NetworkServiceType {
+    static let shared = NetworkService()
+    private let session: URLSession
+    
+    init(session: URLSession = URLSession(configuration: URLSessionConfiguration.ephemeral)) {
+        self.session = session
+    }
     
     @discardableResult
     func load<T>(_ resource: Resource<T>) -> AnyPublisher<T, Error> {

@@ -8,7 +8,7 @@
 import Foundation
 
 struct LoginResponse: Decodable {
-    let success: Bool
+    let success: Bool?
     let expiresAt: String?
     let requestToken: String?
     let statusMessage: String?
@@ -39,4 +39,10 @@ struct User: Codable {
     let id: Int
     let name: String
     let username: String
+}
+
+extension User: Equatable {
+    static func ==(lhs: User, rhs: User) -> Bool {
+        return lhs.id == rhs.id
+    }
 }

@@ -10,9 +10,11 @@ import Combine
 
 class ComingSoonViewController: UIViewController {
     
-    let viewModel = ComingSoonViewModel()
-    private var cancellables = Set<AnyCancellable>()
-    @Published var upComingTitles = [Title]()
+    private var cancellables = [AnyCancellable]()
+    private let viewModel: ComingSoonViewModelType
+    private let appear = PassthroughSubject<Void, Never>()
+    private let selection = PassthroughSubject<Int, Never>()
+    private var upComingTitles = [Title]()
     
     private let tableView: UITableView = {
         let table = UITableView(frame: .zero)
@@ -20,16 +22,24 @@ class ComingSoonViewController: UIViewController {
         return table
     }()
     
+    init(viewModel: ComingSoonViewModelType) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init(coder: NSCoder) {
+        fatalError("Not supported")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Coming Soon"
-        navigationController?.navigationBar.prefersLargeTitles = true
-        
-        view.addSubview(tableView)
-        tableView.delegate = self
-        tableView.dataSource = self
-        
-        fetchData()
+        configureUI()
+        bind(to: viewModel)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        appear.send(())
     }
     
     override func viewDidLayoutSubviews() {
@@ -37,18 +47,43 @@ class ComingSoonViewController: UIViewController {
         tableView.frame = view.bounds
     }
     
-    private func fetchData() {
-        viewModel.getUpComingMovies()
-        viewModel.$upComingMovies
-            .sink { [weak self] titles in
-                self?.upComingTitles = titles
-                self?.tableView.reloadData()
-            }
-            .store(in: &cancellables)
+    func configureUI() {
+        title = "Coming Soon"
+        navigationController?.navigationBar.prefersLargeTitles = true
+        
+        view.addSubview(tableView)
+        tableView.delegate = self
+        tableView.dataSource = self
+    }
+    
+    func bind(to viewModel: ComingSoonViewModelType) {
+        cancellables.forEach{ $0.cancel() }
+        cancellables.removeAll()
+        
+        let input = ComingSoonViewModelInput(appear: appear.eraseToAnyPublisher(), selection: selection.eraseToAnyPublisher())
+        
+        let output = viewModel.transform(input: input)
+        
+        output.sink { [unowned self] state in
+            self.render(state)
+        }
+        .store(in: &cancellables)
+    }
+    
+    func render(_ state: ComingSoonTitleState) {
+        switch state {
+        case .loading:
+            print("Loading")
+        case .success(let titles):
+            self.upComingTitles = titles
+            tableView.reloadData()
+        case .failure(let error):
+            print(error)
+        }
     }
 }
 
-extension ComingSoonViewController: UITableViewDataSource, UITableViewDelegate {
+extension ComingSoonViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         upComingTitles.count
     }
@@ -57,9 +92,7 @@ extension ComingSoonViewController: UITableViewDataSource, UITableViewDelegate {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: ComingSoonTableViewCell.identifier, for: indexPath) as? ComingSoonTableViewCell else {
             return UITableViewCell()
         }
-        
-        cell.configureCell(with: upComingTitles[indexPath.row])
-        
+        cell.bind(with: upComingTitles[indexPath.row])
         return cell
     }
     
@@ -69,4 +102,11 @@ extension ComingSoonViewController: UITableViewDataSource, UITableViewDelegate {
     
 }
 
+extension ComingSoonViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let title = upComingTitles[indexPath.row]
+        selection.send(title.id)
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
 

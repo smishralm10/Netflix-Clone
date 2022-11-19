@@ -8,22 +8,41 @@
 import Foundation
 import Combine
 
-class ComingSoonViewModel {
-    private var cancellables = Set<AnyCancellable>()
-    @Published var upComingMovies = [Title]()
+class ComingSoonViewModel: ComingSoonViewModelType {
+    private weak var navigator: TitleNavigator?
+    private let useCase: ComingSoonUseCaseType
+    private var cancellables = [AnyCancellable]()
     
-    func getUpComingMovies() {
-        TMDBServices.shared
-            .load(Resource<[Title]>.upComing(type: .movie))
-            .receive(on: RunLoop.main)
-            .sink { completion in
-                if case let .failure(error) = completion {
-                    print(error.localizedDescription)
-                }
-            } receiveValue: { [weak self] titles in
-                self?.upComingMovies = titles.results
+    init(useCase: ComingSoonUseCaseType, navigator: TitleNavigator) {
+        self.useCase = useCase
+        self.navigator = navigator
+    }
+    
+    func transform(input: ComingSoonViewModelInput) -> ComingSoonViewModelOutput {
+        cancellables.forEach{ $0.cancel() }
+        cancellables.removeAll()
+        
+        input.selection
+            .sink { [unowned self] titleId in
+                self.navigator?.showDetails(forTitle: titleId)
             }
             .store(in: &cancellables)
+        
+        let titles = input.appear
+            .flatMapLatest { [unowned self] _ in
+                self.useCase.comingSoon()
+            }
+            .map({ result -> ComingSoonTitleState in
+                switch result {
+                case .success(let titles): return .success(titles.results)
+                case.failure(let error): return .failure(error)
+                }
+            })
+            .eraseToAnyPublisher()
+        
+        let loading: AnyPublisher<ComingSoonTitleState, Never> = input.appear.map({ _ in .loading }).eraseToAnyPublisher()
+        
+        return Publishers.Merge(loading, titles).removeDuplicates().eraseToAnyPublisher()
     }
 }
 

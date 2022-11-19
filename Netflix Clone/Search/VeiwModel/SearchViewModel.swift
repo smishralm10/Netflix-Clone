@@ -7,37 +7,62 @@
 
 import Foundation
 import Combine
+import UIKit
 
-final class SearchViewModel {
-    @Published var titles = [Title]()
-    @Published var searchResultsTitles = [Title]()
-    private var cancellables = Set<AnyCancellable>()
+final class SearchViewModel: TitleSearchViewModelType {
+    private weak var navigator: TitleNavigator?
+    private let useCase: SearchTitleUseCaseType
+    private var cancellables: [AnyCancellable] = []
     
-    func getDiscoverables() {
-        TMDBServices.shared
-            .load(Resource<[Title]>.discover(type: .movie))
-            .receive(on: RunLoop.main)
-            .sink { completion in
-                if case let .failure(error) = completion {
-                    print(error.localizedDescription)
-                }
-            } receiveValue: { [weak self] titles in
-                self?.titles = titles.results
-            }
-            .store(in: &cancellables)
+    init(useCase: SearchTitleUseCaseType, navigator: TitleNavigator) {
+        self.useCase = useCase
+        self.navigator = navigator
     }
     
-    func search(query: String, type: TitleType) {
-        TMDBServices.shared
-            .load(Resource<[Title]>.search(type: type, query: query))
-            .receive(on: RunLoop.main)
-            .sink { completion in
-                if case let .failure(error) = completion {
-                    print(error.localizedDescription)
-                }
-            } receiveValue: { [weak self] titles in
-                self?.searchResultsTitles = titles.results
+    func transform(input: TitleSearchViewModelInput) -> TitleSearchViewModelOutput {
+        cancellables.forEach { $0.cancel() }
+        cancellables.removeAll()
+        
+        input.selection
+            .sink { [unowned self] titleId in
+                self.navigator?.showDetails(forTitle: titleId)
             }
             .store(in: &cancellables)
+        
+        let searchInput = input.search
+            .debounce(for: .milliseconds(300), scheduler: Scheduler.mainScheduler)
+            .removeDuplicates()
+        
+        let titles = searchInput
+            .filter({ !$0.isEmpty })
+            .flatMapLatest({ [unowned self] query in
+                self.useCase.searchTitles(with: query, type: .movie)
+            })
+            .map({ result -> TitleSearchState in
+                switch result {
+                case .success(let titles) where titles.results.isEmpty:
+                    return .noResults
+                case .success(let titles):
+                    return .success(titles.results)
+                case .failure(let error):
+                    return .failure(error)
+                }
+            })
+            .eraseToAnyPublisher()
+        
+        let discoverTitles = self.useCase.discoverTitles()
+            .map({ result -> TitleSearchState in
+                switch result {
+                case .success(let titles):
+                    return .idle(titles.results)
+                case .failure(let error):
+                    return .failure(error)
+                }
+            })
+            .eraseToAnyPublisher()
+        
+        let initialState: TitleSearchViewModelOutput = discoverTitles
+        
+        return Publishers.Merge(initialState, titles).eraseToAnyPublisher()
     }
 }

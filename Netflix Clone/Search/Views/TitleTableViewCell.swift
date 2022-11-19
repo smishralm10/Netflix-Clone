@@ -51,7 +51,6 @@ class TitleTableViewCell: UITableViewCell {
         addSubview(posterImageView)
         addSubview(titleLabel)
         addSubview(playButton)
-        
         applyContraints()
     }
     
@@ -59,9 +58,11 @@ class TitleTableViewCell: UITableViewCell {
         fatalError()
     }
     
-    func configureCell(title: Title) {
-        let url = ImageSize.small.url.appendingPathComponent(title.posterPath)
-        posterImageView.sd_setImage(with: url)
+    func bind(to title: Title) {
+        if let posterPath = title.posterPath {
+            let url = ImageSize.small.url.appendingPathComponent(posterPath)
+            posterImageView.sd_setImage(with: url)
+        }
         titleLabel.text = title.title
     }
     

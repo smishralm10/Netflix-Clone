@@ -10,40 +10,48 @@ import Combine
 
 class HomeViewController: UIViewController {
     
-    private let viewModel = HomeViewModel()
-    var cancellables = Set<AnyCancellable>()
-    private var watchListTitles = [Title]()
+    private var cancellables = [AnyCancellable]()
+    private var viewModel: HomeViewModelType
+    private var appear = PassthroughSubject<Void, Never>()
+    private var selection = PassthroughSubject<Int, Never>()
+    private var addToList = PassthroughSubject<(Int, Bool), Never>()
     
-    private var sectionTitles = ["Trending", "Top Rated", "Popular"]
-    private var sectionTitles2 = ["Trending", "Top Rated", "Popular", "My List"]
+    private var collectionView: UICollectionView! = nil
+    private var dataSource: UICollectionViewDiffableDataSource<TitleCollection, Title>! = nil
+    private var currentSnapshot: NSDiffableDataSourceSnapshot<TitleCollection, Title>! = nil
+    static let titleElementKind = "title-element-kind"
+    static let heroElementKind = "hero-element-kind"
 
-    private let homeFeedTable: UITableView = {
-        let table = UITableView(frame: .zero, style: .grouped)
-        table.register(CollectionViewTableViewCell.self, forCellReuseIdentifier: CollectionViewTableViewCell.identifer)
-        return table
-    }()
+    init(viewModel: HomeViewModelType) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init(coder: NSCoder) {
+        fatalError("Not supported")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        navigationController?.navigationBar.isTranslucent = true
-        
-        view.addSubview(homeFeedTable)
-        homeFeedTable.delegate = self
-        homeFeedTable.dataSource = self
-        
+        configureUI()
         configureNavBar()
-        
-        // Do any additional setup after loading the view.
-        let headerView = HeroUIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 450), viewModel: viewModel)
-        homeFeedTable.tableHeaderView = headerView
-        
-        loadFeedData()
+        configureHierarchy()
+        configureDataSource()
+        bind(to: viewModel)
     }
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        homeFeedTable.frame = view.bounds
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        appear.send(())
+    }
+    
+    private func configureUI() {
+        navigationController?.navigationBar.isTranslucent = true
     }
     
     private func configureNavBar() {
@@ -51,97 +59,166 @@ class HomeViewController: UIViewController {
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: image, style: .done, target: self, action: nil)
     }
     
-    private func loadFeedData() {
-        viewModel.getTrendingMovies()
-        viewModel.getPopularMovies()
-        viewModel.getTopRatedMovies()
-        viewModel.getWatchList()
-        viewModel.$watchList
-            .sink { [weak self] titles in
-                self?.watchListTitles = titles
-                self?.homeFeedTable.reloadData()
-            }
-            .store(in: &cancellables)
+    private func bind(to viewModel: HomeViewModelType) {
+        cancellables.forEach { $0.cancel() }
+        cancellables.removeAll()
+        
+        let input = HomeViewModelInput(appear: appear.eraseToAnyPublisher(), selection: selection.eraseToAnyPublisher(), addToList: addToList.eraseToAnyPublisher())
+        
+        let output = viewModel.transform(input: input)
+        output.sink { [unowned self] state in
+            self.render(state)
+        }
+        .store(in: &cancellables)
+    }
+    
+    private func render(_ state: HomeTitleState) {
+        switch state {
+        case .loading:
+            print("Loading home feed")
+        case .success(let titles):
+            update(with: titles, animate: true)
+        case .failure(let error):
+            print(error)
+        }
     }
 }
 
-extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
-    
-    func numberOfSections(in tableView: UITableView) -> Int {
-        if watchListTitles.count > 0 {
-            return sectionTitles2.count
-        }
-        return sectionTitles.count
-    }
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: CollectionViewTableViewCell.identifer, for: indexPath) as? CollectionViewTableViewCell else {
-            return UITableViewCell()
-        }
-        
-        cell.delegate = self
-        
-        switch indexPath.section {
-        case Sections.trendingMovies.rawValue:
-            viewModel.$trendingMovies
-                .sink { titles in
-                    cell.configure(with: titles)
-                }
-                .store(in: &cancellables)
-        case Sections.popular.rawValue:
-            viewModel.$popularMovies
-                .sink { titles in
-                    cell.configure(with: titles)
-                }
-                .store(in: &cancellables)
-        case Sections.toprated.rawValue:
-            viewModel.$topRatedMovies
-                .sink { titles in
-                    cell.configure(with: titles)
-                }
-                .store(in: &cancellables)
-        case Sections.watchList.rawValue:
-            viewModel.$watchList
-                .sink { titles in
-                    cell.configure(with: titles)
-                }
-                .store(in: &cancellables)
-        default:
-            return UITableViewCell()
+fileprivate extension HomeViewController {
+    func createLayout() -> UICollectionViewLayout {
+        let sectionProvider = { (sectionIndex: Int,
+            layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
+            let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(1.0))
+            let item = NSCollectionLayoutItem(layoutSize: itemSize)
+            let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.3), heightDimension: .absolute(200))
+            let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+            group.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 30, bottom: 0, trailing: 0)
             
+            let section = NSCollectionLayoutSection(group: group)
+            section.orthogonalScrollingBehavior = .continuous
+            section.interGroupSpacing = 30
+            
+            let titleSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .estimated(50))
+            let titleSupplementary = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: titleSize, elementKind: HomeViewController.titleElementKind, alignment: .top)
+            
+            
+            let heroSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .absolute(450))
+            let heroSupplementary = NSCollectionLayoutBoundarySupplementaryItem(layoutSize: heroSize, elementKind: HomeViewController.heroElementKind, alignment: .top)
+            
+            if sectionIndex == 0 {
+                section.boundarySupplementaryItems = [titleSupplementary, heroSupplementary]
+            } else {
+                section.boundarySupplementaryItems = [titleSupplementary]
+            }
+            return section
         }
         
-        return cell
+        let config = UICollectionViewCompositionalLayoutConfiguration()
+        config.interSectionSpacing = 20
+        let layout = UICollectionViewCompositionalLayout(sectionProvider: sectionProvider, configuration: config)
+        return layout
+    }
+}
+
+extension HomeViewController {
+    func configureHierarchy() {
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: createLayout())
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.backgroundColor = .systemBackground
+        view.addSubview(collectionView)
+        collectionView.delegate = self
+        NSLayoutConstraint.activate([
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
     }
     
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 200
-    }
-    
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 40
-    }
-    
-    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        if watchListTitles.count > 0 {
-            return sectionTitles2[section]
+    func configureDataSource() {
+        let cellRegistration = UICollectionView.CellRegistration
+            <TitleCollectionViewCell, Title> { (cell, indexpath, title) in
+                cell.bind(with: title.posterPath)
         }
-        return sectionTitles[section]
+        
+        dataSource = UICollectionViewDiffableDataSource<TitleCollection, Title>(collectionView: collectionView, cellProvider:
+            { (collectionView: UICollectionView, indexPath: IndexPath, title: Title) in
+            return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: title)
+        })
+        
+        let supplementaryRegistration = UICollectionView.SupplementaryRegistration
+        <TitleSupplementaryView>(elementKind: HomeViewController.titleElementKind) { supplementaryView, elementKind, indexPath in
+            if let snapshot = self.currentSnapshot {
+                let titleCategory = snapshot.sectionIdentifiers[indexPath.section]
+                supplementaryView.label.text = titleCategory.header
+            }
+        }
+        
+        let heroSupplementaryRegistration = UICollectionView.SupplementaryRegistration
+        <HeroUIView>(elementKind: HomeViewController.heroElementKind) { supplementaryView, elementKind, indexPath in
+            guard var snapshot = self.currentSnapshot else {
+                return
+            }
+            
+            let titleCategory = snapshot.sectionIdentifiers[indexPath.section]
+            let title = titleCategory.titles[0]
+            if let posterPath = title.posterPath {
+                supplementaryView.setImage(path: posterPath)
+            }
+            
+            supplementaryView.infoButtonHandler  = { [weak self] in
+                self?.selection.send(title.id)
+            }
+            
+            supplementaryView.addButtonHandler = { [weak self] sender in
+                if sender.isSelected {
+                    if let dataSource = self?.dataSource {
+                        let item = dataSource.itemIdentifier(for: indexPath)
+                        snapshot.deleteItems([item!])
+                        dataSource.apply(snapshot)
+                    }
+                    sender.isSelected.toggle()
+                } else {
+                    let collection = TitleCollection(header: "My List", titles: [title])
+                    self?.update(with: [collection])
+                    sender.isSelected.toggle()
+                }
+            }
+        }
+        
+        dataSource.supplementaryViewProvider = { (view, kind, index) in
+            switch kind {
+            case HomeViewController.heroElementKind:
+                return self.collectionView.dequeueConfiguredReusableSupplementary(using: heroSupplementaryRegistration, for: index)
+            case HomeViewController.titleElementKind:
+                return self.collectionView.dequeueConfiguredReusableSupplementary(using: supplementaryRegistration, for: index)
+            default:
+                return UICollectionReusableView()
+            }
+        }
     }
     
-    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
-        guard let header = view as? UITableViewHeaderFooterView else {return}
-        var content = header.defaultContentConfiguration()
-        content.text = watchListTitles.count > 0 ? sectionTitles2[section] : sectionTitles[section]
-        content.textProperties.font = .systemFont(ofSize: 18, weight: .semibold)
-        content.textProperties.color = .white
-        header.contentConfiguration = content
+    func update(with collections: [TitleCollection], animate: Bool = true) {
+        DispatchQueue.main.async {
+            self.currentSnapshot = NSDiffableDataSourceSnapshot<TitleCollection, Title>()
+            collections.forEach { collection in
+                self.currentSnapshot.appendSections([collection])
+                self.currentSnapshot.appendItems(collection.titles)
+            }
+            self.dataSource.apply(self.currentSnapshot, animatingDifferences: animate)
+        }
     }
     
+}
+
+extension HomeViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if let snapshot = self.currentSnapshot {
+            let title = snapshot.itemIdentifiers[indexPath.item]
+            self.selection.send(title.id)
+        }
+    }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let defualtOffset = view.safeAreaInsets.top
@@ -149,7 +226,6 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         
         navigationController?.navigationBar.transform = .init(translationX: 0, y: min(0, -offset))
     }
-    
 }
 
 extension UIImage {
@@ -158,23 +234,6 @@ extension UIImage {
         let image = renderer.image { _ in
             self.draw(in: CGRect.init(origin: CGPoint.zero, size: size))
         }
-        
         return image.withRenderingMode(self.renderingMode)
     }
 }
-
-enum Sections: Int {
-    case trendingMovies = 0
-    case toprated = 1
-    case popular = 2
-    case watchList = 3
-}
-
-extension HomeViewController: CollectionViewTableViewCellDelegate {
-    func collectionViewTableViewCellDidTap(_ cell: CollectionViewTableViewCell, viewController: UIViewController) {
-        DispatchQueue.main.async { [weak self] in
-            self?.navigationController?.pushViewController(viewController, animated: true)
-        }
-    }
-}
-
