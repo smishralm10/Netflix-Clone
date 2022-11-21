@@ -40,10 +40,6 @@ class HomeViewController: UIViewController {
         configureDataSource()
         bind(to: viewModel)
     }
-
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-    }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -161,27 +157,36 @@ extension HomeViewController {
             }
             
             let titleCategory = snapshot.sectionIdentifiers[indexPath.section]
-            let title = titleCategory.titles[0]
-            if let posterPath = title.posterPath {
-                supplementaryView.setImage(path: posterPath)
+            let heroTitle = titleCategory.titles[0]
+            supplementaryView.bind(with: heroTitle)
+            let myList = snapshot.sectionIdentifiers[3]
+            
+            DispatchQueue.main.async {
+                myList.titles.forEach { title in
+                    if title.id == heroTitle.id {
+                        supplementaryView.addButton.isSelected = true
+                    } else {
+                        supplementaryView.addButton.isSelected = false
+                    }
+                }
             }
             
             supplementaryView.infoButtonHandler  = { [weak self] in
-                self?.selection.send(title.id)
+                self?.selection.send(heroTitle.id)
             }
             
             supplementaryView.addButtonHandler = { [weak self] sender in
                 if sender.isSelected {
-                    if let dataSource = self?.dataSource {
-                        let item = dataSource.itemIdentifier(for: indexPath)
-                        snapshot.deleteItems([item!])
-                        dataSource.apply(snapshot)
-                    }
+                    snapshot.deleteItems([heroTitle])
+                    self?.dataSource.apply(snapshot)
                     sender.isSelected.toggle()
+                    self?.addToList.send((heroTitle.id, false))
                 } else {
-                    let collection = TitleCollection(header: "My List", titles: [title])
-                    self?.update(with: [collection])
+                    let myList = snapshot.sectionIdentifiers[3]
+                    snapshot.appendItems([heroTitle], toSection: myList)
+                    self?.dataSource.apply(snapshot, animatingDifferences: true)
                     sender.isSelected.toggle()
+                    self?.addToList.send((heroTitle.id, true))
                 }
             }
         }
@@ -201,9 +206,9 @@ extension HomeViewController {
     func update(with collections: [TitleCollection], animate: Bool = true) {
         DispatchQueue.main.async {
             self.currentSnapshot = NSDiffableDataSourceSnapshot<TitleCollection, Title>()
+            self.currentSnapshot.appendSections(collections)
             collections.forEach { collection in
-                self.currentSnapshot.appendSections([collection])
-                self.currentSnapshot.appendItems(collection.titles)
+                self.currentSnapshot.appendItems(collection.titles, toSection: collection)
             }
             self.dataSource.apply(self.currentSnapshot, animatingDifferences: animate)
         }
@@ -214,8 +219,8 @@ extension HomeViewController {
 extension HomeViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if let snapshot = self.currentSnapshot {
-            let title = snapshot.itemIdentifiers[indexPath.item]
+        let title = dataSource.itemIdentifier(for: indexPath)
+        if let title = title {
             self.selection.send(title.id)
         }
     }
