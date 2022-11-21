@@ -29,10 +29,18 @@ class HomeViewModel: HomeViewModelType {
             }
             .store(in: &cancellables)
         
-//        input.addToList
-//            .sink { [weak self] (id, shouldAdd) in
-//                self?.useCase.addToList(id: id, shouldAdd: shouldAdd)
-//            }.store(in: &cancellables)
+        input.addToList
+            .flatMapLatest { [unowned self] (id, shouldAdd) in self.useCase.addToList(id: id, shouldAdd: shouldAdd) }
+            .sink { result in
+                switch result {
+                case .success(_):
+                    print("Added to list")
+                case .failure(_):
+                    print("Failed to add to list")
+                }
+            }
+            .store(in: &cancellables)
+            
         
         let trendingTitles = input.appear
             .flatMapLatest { [unowned self] _ in self.useCase.trendingTitles() }

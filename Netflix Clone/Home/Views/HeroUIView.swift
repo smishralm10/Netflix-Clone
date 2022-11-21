@@ -12,6 +12,7 @@ class HeroUIView: UICollectionReusableView {
     static let reuseIdentifier = "hero-reuse-identifier"
     var addButtonHandler: ((_ sender: UIButton) -> Void)?
     var infoButtonHandler: (() -> Void)?
+    private var heroTitle: Title?
     
     private let heroImageView: UIImageView = {
         let imageView = UIImageView()
@@ -20,7 +21,7 @@ class HeroUIView: UICollectionReusableView {
         return imageView
     }()
     
-    lazy var buttonsStack: UIStackView = {
+    private lazy var buttonsStack: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
         stackView.alignment = .center
@@ -37,7 +38,7 @@ class HeroUIView: UICollectionReusableView {
         return stackView
     }()
     
-    private lazy var addButton: UIButton = {
+    lazy var addButton: UIButton = {
         var config = UIButton.Configuration.plain()
         let button = UIButton()
         let addImage = UIImage(systemName: "plus")?.withRenderingMode(.alwaysTemplate)
@@ -115,7 +116,14 @@ class HeroUIView: UICollectionReusableView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setImage(path: String) {
+    func bind(with title: Title) {
+        self.heroTitle = title
+        if let posterPath = title.posterPath {
+            self.setImage(path: posterPath)
+        }
+    }
+    
+    private func setImage(path: String) {
         let url = ImageSize.original.url.appendingPathComponent(path)
         heroImageView.sd_setImage(with: url)
     }
