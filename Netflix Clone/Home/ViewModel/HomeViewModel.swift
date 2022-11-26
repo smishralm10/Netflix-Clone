@@ -51,6 +51,7 @@ class HomeViewModel: HomeViewModelType {
                     return []
                 }
             })
+            .removeDuplicates()
             .eraseToAnyPublisher()
         
         let topRatedTitles = input.appear
@@ -62,6 +63,7 @@ class HomeViewModel: HomeViewModelType {
                     return []
                 }
             }
+            .removeDuplicates()
             .eraseToAnyPublisher()
 
         let popularTitles = input.appear
@@ -73,6 +75,7 @@ class HomeViewModel: HomeViewModelType {
                     return []
                 }
             }
+            .removeDuplicates()
             .eraseToAnyPublisher()
         
         let watchlistTitles = input.appear
@@ -84,6 +87,7 @@ class HomeViewModel: HomeViewModelType {
                     return []
                 }
             }
+            .removeDuplicates()
             .eraseToAnyPublisher()
         
         let homeFeedTitles = Publishers.CombineLatest4(trendingTitles, topRatedTitles, popularTitles, watchlistTitles)
@@ -94,7 +98,7 @@ class HomeViewModel: HomeViewModelType {
         
         let loading: HomeViewModelOutput = input.appear.map { _ in .loading }.eraseToAnyPublisher()
         
-        return Publishers.Merge(loading, homeFeedTitles).eraseToAnyPublisher()
+        return Publishers.Merge(loading, homeFeedTitles).removeDuplicates().eraseToAnyPublisher()
     }
 }
 
