@@ -19,11 +19,15 @@ struct Title: Decodable {
     let genreIds: [GenreId]?
     let genres: [Genre]?
     let releaseDate: String
+    let isAdult: Bool?
+    let runtime: Int?
+    
     
     enum CodingKeys: String, CodingKey {
-        case id, title, overview, genres, posterPath = "poster_path"
+        case id, title, overview, genres, runtime, posterPath = "poster_path"
         case genreIds = "genre_ids"
         case releaseDate = "release_date"
+        case isAdult = "adult"
     }
 }
 
